@@ -1,0 +1,11 @@
+{
+  "COMPort": "COM3",
+  "RefreshTempInterval": 60,
+  "DBConnection": "Provider=SQLNCLI11;Server=192.168.1.222\\MARS;Database=Weather;Trusted_Connection=yes;",
+  "TestLocal": "Server=(localdb)\\mssqllocaldb;Database=Weather;Trusted_Connection=True;",
+  "ServiceImplementer": "TempReadingService",
+  "HistorySettings": {
+    "HourInterval": 0,
+    "MinuteInterval": 30
+  }
+}
