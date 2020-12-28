@@ -5,10 +5,17 @@ import {Container, Table, Button, Col, Row} from 'react-bootstrap'
 import * as moment from 'moment'
 import DateTimePicker from '../UI/DateTimePicker'
 import Graphic from '../UI/Graphic'
+import {NavLink} from "react-router-dom";
 
 class TempHistory extends Component {
     componentDidMount() {
         this.fetchHistory()
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot)
+    {
+        if ((this.props.snID !== prevProps.snID) || (this.props.from !== prevProps.from) || (this.props.to !== prevProps.to))
+            this.fetchHistory()
     }
 
     fetchHistory() {
@@ -42,6 +49,10 @@ class TempHistory extends Component {
         return cls.join('')
     }
 
+    isSingleSensor() {
+        return this.props.snID != null;
+    }
+
     getSensorsHistoryForGraphic() {
         let group = this.props.tempHistory.reduce((r, obj) => {
             const name = obj.snID + '|' + obj.sensors.name
@@ -57,7 +68,7 @@ class TempHistory extends Component {
                 <tr key={index} className={this.getClassForRow(itemHist.temperature)}>
                     <td>{Number(itemHist.temperature).toFixed(1)}</td>
                     <td>{moment(itemHist.date).format('DD.MM.YYYY HH:mm:ss')}</td>
-                    <td>{itemHist.sensors.name}</td>
+                    <td><NavLink to={`/TempHistory/${itemHist.snID}/${this.props.from}/${this.props.to}`}>{itemHist.sensors.name}</NavLink></td>
                     <td>{itemHist.sensors.rom}</td>
                 </tr>
             )
@@ -65,6 +76,11 @@ class TempHistory extends Component {
     }
 
     render() {
+        const renderGraphic = ()=>{
+            if(this.isSingleSensor()){
+                return <Graphic historyObj={this.getSensorsHistoryForGraphic()}/>
+            }
+        }
         return(
             <div className="content-wrapper" style={{marginLeft: 0}}>
                 <Container fluid>
@@ -84,14 +100,11 @@ class TempHistory extends Component {
                             </Col>
                         </Row>
                         <br />
-                        <Graphic historyObj={this.getSensorsHistoryForGraphic()} />
-                        <br />
-                        <div className="pt-2 pb-2 mb-2 border-top" />
-                        <br />
+                        { renderGraphic() }
                         <Table striped bordered>
                             <thead>
                                 <tr>
-                                <th>Temperature</th>
+                                <th>Temperatureq</th>
                                 <th>Date</th>
                                 <th>Sensor name</th>
                                 <th>ROM</th>
@@ -108,11 +121,12 @@ class TempHistory extends Component {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
     return {
         tempHistory: state.tempHistory.tempHistory,
-        from: state.tempHistory.from,
-        to: state.tempHistory.to
+        snID: !ownProps.match.params.snID ? state.tempHistory.snID : ownProps.match.params.snID,
+        from: !ownProps.match.params.from ? state.tempHistory.from : ownProps.match.params.from,
+        to: !ownProps.match.params.to ? state.tempHistory.to : ownProps.match.params.to,
     }
 }
 

@@ -11,7 +11,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +22,7 @@ namespace HomeWeather.Services
         private readonly object lockAccess = new object();
         private Timer _timer;
         private UART_Adapter uart;
-        private List<OneWireSensor> sensors;
+        private List<SensorObject> sensors;
         private readonly ConcurrentDictionary<long, float> tempCache;
         private readonly Settings settings;
         private DateTime nextTimeForHistory;
@@ -44,10 +43,18 @@ namespace HomeWeather.Services
             OneWireSensor sensor = new DS18B20(uart);
             List<byte[]> ROMs = new List<byte[]>();
             ROMs = sensor.GetConnectedROMs();
-            sensors = new List<OneWireSensor>();
-            foreach (byte[] item in ROMs)
+            sensors = new List<SensorObject>();
+            using (var scope = _scopeFactory.CreateScope())
             {
-                sensors.Add(Utils.CreateSensor(item[0], uart, item));
+                var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
+
+                foreach (byte[] item in ROMs)
+                {
+                    OneWireSensor physSensor = Utils.CreateSensor(item[0], uart, item);
+                    var dbSensor = dbContext.Sensors.FirstOrDefault(sn => sn.ROM == physSensor.ROM);
+                    if (dbSensor != null)
+                        sensors.Add(new SensorObject(physSensor) { SensorID = dbSensor.snID, Name = dbSensor.Name, ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
+                }
             }
             SetNextTimeForHist();
             ReadTemperature();
@@ -64,13 +71,13 @@ namespace HomeWeather.Services
         {
             if (uart.IsOpened)
             {
-                foreach (OneWireSensor sensor in sensors)
+                foreach (SensorObject sensor in sensors)
                 {
-                    float Temp = sensor.GetTemperature();
+                    float temp = sensor.PhysSensor.GetTemperature();
 
-                    tempCache.AddOrUpdate(sensor.ROMInt, Temp, (key, existingVal) =>
+                    tempCache.AddOrUpdate(sensor.SensorID, temp, (key, existingVal) =>
                     {
-                        existingVal = Temp;
+                        existingVal = temp;
                         return existingVal;
                     });
                 }
@@ -118,14 +125,14 @@ namespace HomeWeather.Services
             nextTimeForHistory = recodedDate.AddHours(settings.HistorySettings.HourInterval);
         }
 
-        private void WriteTempToHistory(long RomInt, float temp)
+        private void WriteTempToHistory(long sensorID, float temp)
         {
             using (var scope = _scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
 
                 dbContext.TempHistory.Add(new TempHistory {
-                    snID = RomInt,
+                    snID = sensorID,
                     Temperature = temp,
                     Date = nextTimeForHistory
                 });
@@ -154,87 +161,69 @@ namespace HomeWeather.Services
 
             if (tempCache.Count > 0)
             {
-                using (var scope = _scopeFactory.CreateScope())
+                foreach (KeyValuePair<long, float> item in tempCache)
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
-
-                    foreach (KeyValuePair<long, float> item in tempCache)
+                    SensorObject sensor = await Task.Run(() => sensors.FirstOrDefault(sn => sn.SensorID == item.Key));
+                    if (sensor == null)
                     {
-                        var sensor = await dbContext.Sensors.FindAsync(item.Key);
-                        if (sensor == null)
+                        cache.Add(new TempCache()
                         {
-                            cache.Add(new TempCache()
-                            {
-                                snID = item.Key,
-                                Temperature = item.Value,
-                                ROM = "N/A",
-                                Name = "N/A"
-                            });
-                        }
-                        else
-                        {
-                            cache.Add(new TempCache()
-                            {
-                                snID = item.Key,
-                                Temperature = item.Value,
-                                ROM = sensor.ROM,
-                                Name = sensor.Name
-                            });
-                        }
+                            snID = item.Key,
+                            Temperature = item.Value,
+                            ROM = "N/A",
+                            Name = "N/A"
+                        });
                     }
-
+                    else
+                    {
+                        cache.Add(new TempCache()
+                        {
+                            snID = item.Key,
+                            Temperature = item.Value,
+                            ROM = sensor.ROM,
+                            Name = sensor.Name
+                        });
+                    }
                 }
             }
 
             return cache.AsEnumerable();
         }
 
-        public async Task<object> LastMeasuredTempBySensor(long ROMInt)
+        public async Task<object> LastMeasuredTempBySensor(long snID)
         {
             if (tempCache.Count > 0)
             {
                 foreach (KeyValuePair<long, float> item in tempCache)
                 {
-                    if (item.Key == ROMInt)
+                    if (item.Key == snID)
                     {
-                        using (var scope = _scopeFactory.CreateScope())
-                        {
-                            var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
-
-                            var sensor = await dbContext.Sensors.FindAsync(item.Key);
+                        SensorObject sensor = await Task.Run(() => sensors.FirstOrDefault(sn => sn.SensorID == item.Key));
+                        if (sensor != null)
                             return new TempCache() { snID = item.Key, Temperature = item.Value, ROM = sensor.ROM, Name = sensor.Name };
-                        }
+                        break;
                     }
                 }
             }
 
-            return new TempCache() { snID = -1, Temperature = 0.0F };
+            return new TempCache() { snID = -1, Temperature = 0.0F, ROM = "N/A", Name = "N/A" };
         }
 
         public IEnumerable SensorsList()
         {
-            List<SensorObject> sensorsList = new List<SensorObject>();
-
-            foreach (OneWireSensor item in sensors)
-            {
-                lock (lockAccess)
-                {
-                    sensorsList.Add(new SensorObject() { ROM = item.ROM, RomInt = item.ROMInt, DeviceName = item.DeviceName(item.FamilyCode)});
-                }
-            }
-
-            return sensorsList.AsEnumerable();
+            return sensors.AsEnumerable();
         }
 
-        public object SensorInfo(long ROMInt)
+        public object SensorInfo(long sensorID)
         {
-            foreach (OneWireSensor item in sensors)
+            //foreach (OneWireSensor item in sensors)
+            foreach (SensorObject item in sensors)
             {
-                if (item.ROMInt == ROMInt)
+                if (item.SensorID == sensorID)
                 {
                     lock (lockAccess)
                     {
-                        return new SensorInfoObj() { RomInt = item.ROMInt, ROM = item.ROM, DeviceName = item.DeviceName(item.FamilyCode), Info = item.Info() };
+                        return new SensorInfoObj() { SensorID = item.SensorID, ROM = item.ROM, DeviceName = item.DeviceName, Info = item.PhysSensor.Info() };
                     }
                 }
             }

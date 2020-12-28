@@ -10,7 +10,6 @@ namespace HomeWeather.Models
     public class Sensors
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Required]
         public long snID { get; set; }
         [Required]

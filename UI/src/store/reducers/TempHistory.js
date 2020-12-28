@@ -7,6 +7,7 @@ import {
 
 const initialState = {
     tempHistory: [],
+    snID: null,
     from: new moment().subtract(7, 'days').format('YYYY-MM-DD'),
     to: new moment().format('YYYY-MM-DD')
 }

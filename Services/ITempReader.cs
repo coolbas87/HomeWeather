@@ -9,9 +9,9 @@ namespace HomeWeather.Services
     {
         string Name { get; }
         Task<IEnumerable> LastMeasuredTemp();
-        Task<object> LastMeasuredTempBySensor(long ROMInt);
+        Task<object> LastMeasuredTempBySensor(long snID);
         IEnumerable SensorsList();
 
-        object SensorInfo(long ROMInt);
+        object SensorInfo(long sensorID);
     }
 }

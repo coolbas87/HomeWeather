@@ -35,7 +35,7 @@ namespace HomeWeather.Services
             for (int i = 0; i <= 1; i++)
             {
                 int rndROM = 111111111 + i;
-                sensors.Add(new SensorObject() { RomInt = rndROM, ROM = rndROM.ToString(), DeviceName = $"Sensor {rndROM}"});
+                sensors.Add(new SensorObject() { SensorID = rndROM, ROM = rndROM.ToString(), DeviceName = $"Sensor {rndROM}"});
             }
         }
 
@@ -71,7 +71,7 @@ namespace HomeWeather.Services
             {
                 float Temp = (float)(rnd.Next(-35, 39) + rnd.NextDouble());
 
-                tempCache.AddOrUpdate(sensor.RomInt, Temp, (key, existingVal) =>
+                tempCache.AddOrUpdate(sensor.SensorID, Temp, (key, existingVal) =>
                 {
                     existingVal = Temp;
                     return existingVal;
@@ -120,7 +120,7 @@ namespace HomeWeather.Services
             nextTimeForHistory = recodedDate.AddHours(settings.HistorySettings.HourInterval);
         }
 
-        private void WriteTempToHistory(long RomInt, float temp)
+        private void WriteTempToHistory(long sensorID, float temp)
         {
             using (var scope = _scopeFactory.CreateScope())
             {
@@ -128,7 +128,7 @@ namespace HomeWeather.Services
 
                 dbContext.TempHistory.Add(new TempHistory
                 {
-                    snID = RomInt,
+                    snID = sensorID,
                     Temperature = temp,
                     Date = nextTimeForHistory
                 });
@@ -164,13 +164,13 @@ namespace HomeWeather.Services
             return cache.AsEnumerable();
         }
 
-        public async Task<object> LastMeasuredTempBySensor(long ROMInt)
+        public async Task<object> LastMeasuredTempBySensor(long snID)
         {
             if (tempCache.Count > 0)
             {
                 foreach (KeyValuePair<long, float> item in tempCache)
                 {
-                    if (item.Key == ROMInt)
+                    if (item.Key == snID)
                     {
                         using (var scope = _scopeFactory.CreateScope())
                         {
@@ -194,22 +194,22 @@ namespace HomeWeather.Services
             {
                 lock (lockAccess)
                 {
-                    sensorsList.Add(new SensorObject() { ROM = item.ROM, RomInt = item.RomInt, DeviceName = item.DeviceName });
+                    sensorsList.Add(new SensorObject() { ROM = item.ROM, SensorID = item.SensorID, DeviceName = item.DeviceName });
                 }
             }
 
             return sensorsList.AsEnumerable();
         }
 
-        public object SensorInfo(long ROMInt)
+        public object SensorInfo(long sensorID)
         {
             foreach (SensorObject item in sensors)
             {
-                if (item.RomInt == ROMInt)
+                if (item.SensorID == sensorID)
                 {
                     lock (lockAccess)
                     {
-                        return new SensorInfoObj() { RomInt = item.RomInt, ROM = item.ROM, DeviceName = item.DeviceName, Info = "Dummy Info field"};
+                        return new SensorInfoObj() { SensorID = item.SensorID, ROM = item.ROM, DeviceName = item.DeviceName, Info = "Dummy Info field"};
                     }
                 }
             }

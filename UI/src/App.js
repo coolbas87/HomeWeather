@@ -12,7 +12,9 @@ class App extends Component {
     let routes = (
       <Switch>
         <Route exact path="/" component={CurrentWeather} />
-        <Route path="/TempHistory" component={TempHistory} />
+        <Route path="/TempHistory/:snID/:from/:to" component={TempHistory} />
+        <Route path="/TempHistory/:from/:to" component={TempHistory} />
+        <Route path="/TempHistory/" component={TempHistory} />
         <Redirect to="/" />
       </Switch>
     )
