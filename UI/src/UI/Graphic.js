@@ -1,5 +1,4 @@
 import React from 'react';
-import moment from 'moment';
 import {Line} from 'react-chartjs-2';
 
 
@@ -7,68 +6,60 @@ export default class Example extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            historyObj: props.historyObj
+            historyArr: props.historyArr
         };
     }
 
-    // componentDidMount() {
-        
-    // }
+    getRandomColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    getDataset(index) {
+        const color = this.getRandomColor();
+        return {
+            label: this.props.historyArr[index].name,
+                fill: false,
+            lineTension: 0.1,
+            borderColor: color,
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: color,
+            pointBackgroundColor: color,
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: this.props.historyArr[index].temps
+        }
+    }
 
     prepareData() {
+        if (this.props.historyArr.length === 0)
+            return {}
+
+        let ds = []
+        for (let i = 0; i < this.props.historyArr.length; i++) {
+            ds.push(this.getDataset(i))
+        }
+
         return {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            datasets: [
-              {
-                label: 'My First dataset',
-                fill: false,
-                lineTension: 0.1,
-                backgroundColor: 'rgba(75,192,192,0.4)',
-                borderColor: 'rgba(75,192,192,1)',
-                borderCapStyle: 'butt',
-                borderDash: [],
-                borderDashOffset: 0.0,
-                borderJoinStyle: 'miter',
-                pointBorderColor: 'rgba(75,192,192,1)',
-                pointBackgroundColor: '#fff',
-                pointBorderWidth: 1,
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                pointHoverBorderColor: 'rgba(220,220,220,1)',
-                pointHoverBorderWidth: 2,
-                pointRadius: 1,
-                pointHitRadius: 10,
-                data: [65, 59, 80, 81, 56, 55, 40]
-              },
-              // {
-              //   label: 'My First dataset',
-              //   fill: false,
-              //   lineTension: 0.1,
-              //   backgroundColor: 'rgba(75,192,192,0.4)',
-              //   borderColor: 'rgba(75,192,192,1)',
-              //   borderCapStyle: 'butt',
-              //   borderDash: [],
-              //   borderDashOffset: 0.0,
-              //   borderJoinStyle: 'miter',
-              //   pointBorderColor: 'rgba(75,192,192,1)',
-              //   pointBackgroundColor: '#fff',
-              //   pointBorderWidth: 1,
-              //   pointHoverRadius: 5,
-              //   pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-              //   pointHoverBorderColor: 'rgba(220,220,220,1)',
-              //   pointHoverBorderWidth: 2,
-              //   pointRadius: 1,
-              //   pointHitRadius: 10,
-              //   data: [35, 95, 80, 81, 56, 55, 40]
-              // }
-            ]
-          };
+            labels: this.props.historyArr[0].dates,
+            datasets: ds
+        };
     }
 
     render() {
         return (
             <div>
-                <h2>Line Example</h2>
+                <h3>Temperature graph</h3>
                 <Line data={this.prepareData()} />
                 <br />
                 <div className="pt-2 pb-2 mb-2 border-top" />

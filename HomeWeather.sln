@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29911.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWeather", "HomeWeather.csproj", "{BA184D5A-87C1-452B-A0BD-3C6A5D55BC36}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "HomeWeatherDB", "..\HomeWeatherDB\HomeWeatherDB.sqlproj", "{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,12 +15,6 @@ Global
 		{BA184D5A-87C1-452B-A0BD-3C6A5D55BC36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA184D5A-87C1-452B-A0BD-3C6A5D55BC36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA184D5A-87C1-452B-A0BD-3C6A5D55BC36}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1239743C-BCCD-4329-9A8C-E5FA05D6F8A9}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

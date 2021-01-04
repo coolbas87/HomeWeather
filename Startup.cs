@@ -35,7 +35,7 @@ namespace HomeWeather
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<Settings>(Configuration);
-            services.AddDbContext<HWDbContext>(options => options.UseSqlServer(Configuration["TestLocal"]));
+            services.AddDbContext<HWDbContext>(options => options.UseSqlServer(Configuration["DBConnection"]));
             services.AddControllersWithViews();
             services.AddSwaggerGen(c =>
             {
@@ -92,7 +92,7 @@ namespace HomeWeather
 
             //app.UseSpa(spa =>
             //{
-            //    spa.Options.SourcePath = "ClientApp";
+            //    spa.Options.SourcePath = "UI";
 
             //    if (env.IsDevelopment())
             //    {

@@ -9,7 +9,9 @@ namespace HomeWeather.Models
     public class HWDbContext : DbContext
     {
         public HWDbContext(DbContextOptions<HWDbContext> options): base(options)
-        { }
+        {
+            Database.Migrate();
+        }
 
         public DbSet<TempHistory> TempHistory { get; set; }
         public DbSet<Sensors> Sensors { get; set; }
@@ -21,6 +23,10 @@ namespace HomeWeather.Models
                 .Property(th => th.thID)
                 .HasDefaultValueSql($"NEXT VALUE FOR thID");
 
+            modelBuilder.HasSequence<int>("snID");
+            modelBuilder.Entity<Sensors>()
+                .Property(sn => sn.snID)
+                .HasDefaultValueSql($"NEXT VALUE FOR snID");
             modelBuilder.Entity<Sensors>()
                 .Property(s => s.CreateAt)
                 .HasDefaultValueSql("getdate()");

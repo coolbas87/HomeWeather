@@ -54,12 +54,25 @@ class TempHistory extends Component {
     }
 
     getSensorsHistoryForGraphic() {
-        let group = this.props.tempHistory.reduce((r, obj) => {
-            const name = obj.snID + '|' + obj.sensors.name
-            r[name] = [...r[name] || [], {date:obj.date, temp:obj.temperature}];
+        const retArr = []
+        let historyObj = this.props.tempHistory.reduce((r, obj, currentIndex, array) => {
+            const name = obj.sensors.rom + ' | ' + obj.sensors.name
+            if (!(r[name])) {
+                r[name] = {
+                    dates: [moment(obj.date).format('DD.MM.YYYY HH:mm:ss')],
+                    temps: [obj.temperature]
+                }
+            } else {
+                r[name].dates = [...r[name].dates || [], moment(obj.date).format('DD.MM.YYYY HH:mm:ss')]
+                r[name].temps = [...r[name].temps || [], obj.temperature]
+            }
             return r;
         }, {});
-        console.log('group', group)
+        for (const [key, value] of Object.entries(historyObj)) {
+            value['name'] = key
+            retArr.push(value)
+        }
+        return retArr
     }
 
     renderHistory() {  
@@ -78,7 +91,7 @@ class TempHistory extends Component {
     render() {
         const renderGraphic = ()=>{
             if(this.isSingleSensor()){
-                return <Graphic historyObj={this.getSensorsHistoryForGraphic()}/>
+                return <Graphic historyArr={this.getSensorsHistoryForGraphic()}/>
             }
         }
         return(
@@ -104,7 +117,7 @@ class TempHistory extends Component {
                         <Table striped bordered>
                             <thead>
                                 <tr>
-                                <th>Temperatureq</th>
+                                <th>Temperature</th>
                                 <th>Date</th>
                                 <th>Sensor name</th>
                                 <th>ROM</th>

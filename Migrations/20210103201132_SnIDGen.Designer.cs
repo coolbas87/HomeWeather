@@ -4,14 +4,16 @@ using HomeWeather.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HomeWeather.Migrations
 {
     [DbContext(typeof(HWDbContext))]
-    partial class HWDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210103201132_SnIDGen")]
+    partial class SnIDGen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

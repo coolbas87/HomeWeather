@@ -8,6 +8,7 @@
     <SpaRoot>UI\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     <SignAssembly>false</SignAssembly>
+    <UserSecretsId>328430ea-03a3-4ef0-b82b-3c98ae58f851</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
