@@ -20,11 +20,11 @@
       }
     },
     "HomeWeather": {
-      "commandName": "IISExpress",
+      "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": ""
+      "applicationUrl": "http://localhost:5000"
     }
   }
 }

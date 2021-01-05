@@ -52,7 +52,9 @@ namespace HomeWeather.Services
                 {
                     OneWireSensor physSensor = Utils.CreateSensor(item[0], uart, item);
                     var dbSensor = dbContext.Sensors.FirstOrDefault(sn => sn.ROM == physSensor.ROM);
-                    if (dbSensor != null)
+                    if (dbSensor == null)
+                        sensors.Add(new SensorObject(physSensor) { SensorID = -1, Name = "Not in DB", ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
+                    else
                         sensors.Add(new SensorObject(physSensor) { SensorID = dbSensor.snID, Name = dbSensor.Name, ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
                 }
             }
@@ -131,12 +133,18 @@ namespace HomeWeather.Services
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
 
-                dbContext.TempHistory.Add(new TempHistory {
-                    snID = sensorID,
-                    Temperature = temp,
-                    Date = nextTimeForHistory
-                });
-                dbContext.SaveChanges();
+                var dbSensor = dbContext.Sensors.Find(sensorID);
+
+                if (dbSensor != null)
+                {
+                    dbContext.TempHistory.Add(new TempHistory
+                    {
+                        snID = sensorID,
+                        Temperature = temp,
+                        Date = nextTimeForHistory
+                    });
+                    dbContext.SaveChanges();
+                }
             }
         }
 
