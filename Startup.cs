@@ -48,12 +48,6 @@ namespace HomeWeather
             services.AddSingleton<IHostedService>(provider => (IHostedService)provider.GetService(serviceImplementer));
 
             services.AddCors();
-
-            // In production, the React files will be served from this directory
-            //services.AddSpaStaticFiles(configuration =>
-            //{
-                //configuration.RootPath = "UI/build";
-            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,8 +72,6 @@ namespace HomeWeather
                 c.RoutePrefix = string.Empty;
             });
             app.UseCors(options => options.AllowAnyOrigin());
-            //app.UseStaticFiles();
-            //app.UseSpaStaticFiles();
 
             app.UseRouting();
 
@@ -89,16 +81,6 @@ namespace HomeWeather
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
-
-            //app.UseSpa(spa =>
-            //{
-            //    spa.Options.SourcePath = "UI";
-
-            //    if (env.IsDevelopment())
-            //    {
-            //        spa.UseReactDevelopmentServer(npmScript: "start");
-            //    }
-            //});
         }
     }
 }
