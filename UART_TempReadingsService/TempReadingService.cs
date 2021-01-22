@@ -1,10 +1,6 @@
-﻿using HomeWeather.Controllers;
-using HomeWeather.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OneWireTempLib;
 using System;
 using System.Collections;
@@ -13,12 +9,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Services.TempReaderModels;
+using Microsoft.Extensions.Options;
 
-namespace HomeWeather.Services
+namespace Services.Service
 {
     public partial class TempReadingService : IHostedService, IDisposable, ITempReader
     {
         private readonly ILogger<TempReadingService> _logger;
+        private readonly IDataBaseOperation _dataBase;
         private readonly object lockAccess = new object();
         private Timer _timer;
         private UART_Adapter uart;
@@ -26,12 +25,11 @@ namespace HomeWeather.Services
         private readonly ConcurrentDictionary<long, float> tempCache;
         private readonly Settings settings;
         private DateTime nextTimeForHistory;
-        private readonly IServiceScopeFactory _scopeFactory;
 
-        public TempReadingService(ILogger<TempReadingService> logger, IOptions<Settings> options, IServiceScopeFactory scopeFactory): base()
+        public TempReadingService(ILogger<TempReadingService> logger, IDataBaseOperation dataBase, IOptions<Settings> options): base()
         {
             _logger = logger;
-            _scopeFactory = scopeFactory;
+            _dataBase = dataBase;
             tempCache = new ConcurrentDictionary<long, float>();
             settings = options.Value;
         }
@@ -44,20 +42,17 @@ namespace HomeWeather.Services
             List<byte[]> ROMs = new List<byte[]>();
             ROMs = sensor.GetConnectedROMs();
             sensors = new List<SensorObject>();
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
 
-                foreach (byte[] item in ROMs)
-                {
-                    OneWireSensor physSensor = Utils.CreateSensor(item[0], uart, item);
-                    var dbSensor = dbContext.Sensors.FirstOrDefault(sn => sn.ROM == physSensor.ROM);
-                    if (dbSensor == null)
-                        sensors.Add(new SensorObject(physSensor) { SensorID = -1, Name = "Not in DB", ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
-                    else
-                        sensors.Add(new SensorObject(physSensor) { SensorID = dbSensor.snID, Name = dbSensor.Name, ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
-                }
+            foreach (byte[] item in ROMs)
+            {
+                OneWireSensor physSensor = Utils.CreateSensor(item[0], uart, item);
+                var dbSensor = _dataBase.GetSensorByROM(physSensor.ROM);
+                if (dbSensor == null)
+                    sensors.Add(new SensorObject(physSensor) { SensorID = -1, Name = "Not in DB", ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
+                else
+                    sensors.Add(new SensorObject(physSensor) { SensorID = dbSensor.sensorID, Name = dbSensor.Name, ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
             }
+
             SetNextTimeForHist();
             ReadTemperature();
 
@@ -129,23 +124,7 @@ namespace HomeWeather.Services
 
         private void WriteTempToHistory(long sensorID, float temp)
         {
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
-
-                var dbSensor = dbContext.Sensors.Find(sensorID);
-
-                if (dbSensor != null)
-                {
-                    dbContext.TempHistory.Add(new TempHistory
-                    {
-                        snID = sensorID,
-                        Temperature = temp,
-                        Date = nextTimeForHistory
-                    });
-                    dbContext.SaveChanges();
-                }
-            }
+            _dataBase.WriteTempToHistory(sensorID, temp, nextTimeForHistory);
         }
 
         public Task StopAsync(CancellationToken stoppingToken)
@@ -224,7 +203,6 @@ namespace HomeWeather.Services
 
         public object SensorInfo(long sensorID)
         {
-            //foreach (OneWireSensor item in sensors)
             foreach (SensorObject item in sensors)
             {
                 if (item.SensorID == sensorID)

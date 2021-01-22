@@ -1,9 +1,10 @@
-﻿using HomeWeather.Controllers;
-using HomeWeather.Models;
+﻿using Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Services.Service;
+using Services.TempReaderModels;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -122,7 +123,7 @@ namespace HomeWeather.Services
 
         private void WriteTempToHistory(long sensorID, float temp)
         {
-            using (var scope = _scopeFactory.CreateScope())
+            /*using (var scope = _scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
 
@@ -133,7 +134,7 @@ namespace HomeWeather.Services
                     Date = nextTimeForHistory
                 });
                 dbContext.SaveChanges();
-            }
+            }*/
         }
 
         public async Task<IEnumerable> LastMeasuredTemp()
@@ -142,7 +143,7 @@ namespace HomeWeather.Services
 
             if (tempCache.Count > 0)
             {
-                using (var scope = _scopeFactory.CreateScope())
+                /*using (var scope = _scopeFactory.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
 
@@ -158,7 +159,7 @@ namespace HomeWeather.Services
                         });
                     }
 
-                }
+                }*/
             }
 
             return cache.AsEnumerable();
@@ -172,13 +173,13 @@ namespace HomeWeather.Services
                 {
                     if (item.Key == snID)
                     {
-                        using (var scope = _scopeFactory.CreateScope())
+                        /*using (var scope = _scopeFactory.CreateScope())
                         {
                             var dbContext = scope.ServiceProvider.GetRequiredService<HWDbContext>();
 
                             var sensor = await dbContext.Sensors.FindAsync(item.Key);
                             return new TempCache() { snID = item.Key, Temperature = item.Value, ROM = sensor.ROM, Name = sensor.Name };
-                        }
+                        }*/
                     }
                 }
             }

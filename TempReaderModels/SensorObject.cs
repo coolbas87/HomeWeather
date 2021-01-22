@@ -1,9 +1,9 @@
 ﻿using OneWireTempLib;
 using System.Text.Json.Serialization;
 
-namespace HomeWeather.Services
+namespace Services.TempReaderModels
 {
-    internal class SensorObject
+    public class SensorObject
     {
         private OneWireSensor _physSensor;
         public long SensorID { get; set; }

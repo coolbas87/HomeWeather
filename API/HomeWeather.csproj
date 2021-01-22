@@ -41,9 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="OneWireTempLib">
-      <HintPath>..\OneWireTempLib\bin\Release\netcoreapp3.1\OneWireTempLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Interfaces\Interfaces.csproj" />
+    <ProjectReference Include="..\UART_TempReadingsService\UART_TempReadingsService.csproj" />
   </ItemGroup>
 
 

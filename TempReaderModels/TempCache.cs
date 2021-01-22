@@ -1,6 +1,6 @@
-﻿namespace HomeWeather.Services
+﻿namespace Services.TempReaderModels
 {
-    internal class TempCache
+    public class TempCache
     {
         public long snID { get; set; }
         public float Temperature { get; set; }
