@@ -21,15 +21,14 @@ namespace Services.Service
             uart = new UART_Adapter(Settings.COMPort);
             uart.Open();
             OneWireSensor sensor = new DS18B20(uart);
-            List<byte[]> ROMs = new List<byte[]>();
-            ROMs = sensor.GetConnectedROMs();
+            List<byte[]> ROMs = sensor.GetConnectedROMs();
 
             foreach (byte[] item in ROMs)
             {
                 OneWireSensor physSensor = Utils.CreateSensor(item[0], uart, item);
                 var dbSensor = DataBase.GetSensorByROM(physSensor.ROM);
                 if (dbSensor == null)
-                    Sensors.Add(new SensorObjectUART(physSensor) { SensorID = -1, Name = "Not in DB", ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
+                    Sensors.Add(new SensorObjectUART(physSensor) { SensorID = (Sensors.Count + 1) * -1, Name = "Not in DB", ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
                 else
                     Sensors.Add(new SensorObjectUART(physSensor) { SensorID = dbSensor.sensorID, Name = dbSensor.Name, ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
             }

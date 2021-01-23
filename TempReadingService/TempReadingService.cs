@@ -45,7 +45,6 @@ namespace Services.Service
             DoStartAsync(stoppingToken);
 
             SetNextTimeForHist();
-            ReadTemperature();
 
             timer = new Timer(DoWork, null, TimeSpan.Zero,
                 TimeSpan.FromSeconds(settings.RefreshTempInterval));
@@ -84,6 +83,12 @@ namespace Services.Service
                 existingVal = value.temperature;
                 return existingVal;
             });
+        }
+
+        protected void DeleteValueInTempCahce(long id)
+        {
+            float value;
+            tempCache.TryRemove(id, out value);
         }
 
         private void DoWork(object state)

@@ -43,6 +43,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DummyTempReadingService\DummyTempReadingService.csproj" />
     <ProjectReference Include="..\Interfaces\Interfaces.csproj" />
+    <ProjectReference Include="..\OpenWeatherTempReadingService\OpenWeatherTempReadingService.csproj" />
     <ProjectReference Include="..\UART_TempReadingsService\UART_TempReadingsService.csproj" />
   </ItemGroup>
 
