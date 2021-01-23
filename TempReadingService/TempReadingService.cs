@@ -87,8 +87,7 @@ namespace Services.Service
 
         protected void DeleteValueInTempCahce(long id)
         {
-            float value;
-            tempCache.TryRemove(id, out value);
+            tempCache.TryRemove(id, out _);
         }
 
         private void DoWork(object state)

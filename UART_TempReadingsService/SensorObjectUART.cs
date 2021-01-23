@@ -5,7 +5,7 @@ namespace Services.TempReaderModels
 {
     public class SensorObjectUART: SensorObject
     {
-        private OneWireSensor _physSensor;
+        private readonly OneWireSensor _physSensor;
 
         [JsonIgnore]
         public OneWireSensor PhysSensor

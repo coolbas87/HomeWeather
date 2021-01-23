@@ -58,8 +58,7 @@ namespace Services.Service
         {
             foreach (SensorObject sensor in Sensors)
             {
-                int cityID;
-                if (int.TryParse(sensor.ROM, out cityID))
+                if (int.TryParse(sensor.ROM, out int cityID))
                 {
                     Task<string> task = MakeRequest(cityID);
                     task.Wait();
@@ -67,8 +66,8 @@ namespace Services.Service
                     try
                     {
                         CityWeather weatherForecast = JsonSerializer.Deserialize<CityWeather>(json);
-                        sensor.Name = weatherForecast.name;
-                        AddValueToTempCache((id: sensor.SensorID, temperature: weatherForecast.main.temp));
+                        sensor.Name = weatherForecast.Name;
+                        AddValueToTempCache((id: sensor.SensorID, temperature: weatherForecast.Main.Temp));
                     }
                     catch (Exception e)
                     {

@@ -26,7 +26,7 @@ namespace HomeWeather
         }
 
         public IConfiguration Configuration { get; }
-        private List<Type> TempReaders = new List<Type>() { typeof(TempReadingServiceUART), typeof(DummyTempReadingService), typeof(OpenWeatherTempReadingService) };
+        private readonly List<Type> TempReaders = new List<Type>() { typeof(TempReadingServiceUART), typeof(DummyTempReadingService), typeof(OpenWeatherTempReadingService) };
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
