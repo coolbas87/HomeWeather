@@ -26,7 +26,7 @@ namespace HomeWeather
         }
 
         public IConfiguration Configuration { get; }
-        private List<Type> TempReaders = new List<ITempReader>() { typeof(TempReadingService), typeof(DummyTempReaderService) };
+        private List<Type> TempReaders = new List<Type>() { typeof(TempReadingServiceUART), typeof(DummyTempReadingService) };
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -38,7 +38,7 @@ namespace HomeWeather
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HomeWeather API", Version = "v1" });
             });
 
-            ITempReader serviceImplementer = TempReaders.FirstOrDefault(s => s.Name == Configuration["ServiceImplementer"]);
+            Type serviceImplementer = TempReaders.FirstOrDefault(s => s.Name == Configuration["ServiceImplementer"]);
             services.Configure<Settings>(Configuration);
             services.AddSingleton(serviceImplementer);
             services.AddSingleton(provider => (ITempReader)provider.GetService(serviceImplementer));

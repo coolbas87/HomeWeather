@@ -4,10 +4,4 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="OneWireTempLib">
-      <HintPath>..\..\OneWireTempLib\bin\Release\netcoreapp3.1\OneWireTempLib.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

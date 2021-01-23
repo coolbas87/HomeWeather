@@ -11,7 +11,6 @@ namespace Interfaces
         Task<IEnumerable> LastMeasuredTemp();
         Task<object> LastMeasuredTempBySensor(long snID);
         IEnumerable SensorsList();
-
         object SensorInfo(long sensorID);
     }
 }

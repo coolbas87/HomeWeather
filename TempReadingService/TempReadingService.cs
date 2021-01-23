@@ -1,7 +1,6 @@
 ﻿using Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OneWireTempLib;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -14,71 +13,77 @@ using Microsoft.Extensions.Options;
 
 namespace Services.Service
 {
-    public partial class TempReadingService : IHostedService, IDisposable, ITempReader
+    public abstract class TempReadingService : IHostedService, IDisposable, ITempReader
     {
-        private readonly ILogger<TempReadingService> _logger;
-        private readonly IDataBaseOperation _dataBase;
+        private readonly ILogger<TempReadingService> logger;
+        private readonly IDataBaseOperation dataBase;
         private readonly object lockAccess = new object();
-        private Timer _timer;
-        private UART_Adapter uart;
+        private Timer timer;
         private List<SensorObject> sensors;
         private readonly ConcurrentDictionary<long, float> tempCache;
         private readonly Settings settings;
         private DateTime nextTimeForHistory;
 
-        public TempReadingService(ILogger<TempReadingService> logger, IDataBaseOperation dataBase, IOptions<Settings> options): base()
+        protected List<SensorObject> Sensors => sensors;
+        protected ILogger<TempReadingService> Logger => logger;
+        protected IDataBaseOperation DataBase => dataBase;
+        protected Timer Timer => timer;
+        protected Settings Settings => settings;
+
+        public TempReadingService(ILogger<TempReadingService> logger, IDataBaseOperation dataBase, IOptions<Settings> options) : base()
         {
-            _logger = logger;
-            _dataBase = dataBase;
+            this.logger = logger;
+            this.dataBase = dataBase;
             tempCache = new ConcurrentDictionary<long, float>();
             settings = options.Value;
         }
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            uart = new UART_Adapter(settings.COMPort);
-            uart.Open();
-            OneWireSensor sensor = new DS18B20(uart);
-            List<byte[]> ROMs = new List<byte[]>();
-            ROMs = sensor.GetConnectedROMs();
             sensors = new List<SensorObject>();
 
-            foreach (byte[] item in ROMs)
-            {
-                OneWireSensor physSensor = Utils.CreateSensor(item[0], uart, item);
-                var dbSensor = _dataBase.GetSensorByROM(physSensor.ROM);
-                if (dbSensor == null)
-                    sensors.Add(new SensorObject(physSensor) { SensorID = -1, Name = "Not in DB", ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
-                else
-                    sensors.Add(new SensorObject(physSensor) { SensorID = dbSensor.sensorID, Name = dbSensor.Name, ROM = physSensor.ROM, DeviceName = physSensor.DeviceName(physSensor.FamilyCode) });
-            }
+            DoStartAsync(stoppingToken);
 
             SetNextTimeForHist();
             ReadTemperature();
 
-            _timer = new Timer(DoWork, null, TimeSpan.Zero,
+            timer = new Timer(DoWork, null, TimeSpan.Zero,
                 TimeSpan.FromSeconds(settings.RefreshTempInterval));
 
-            _logger.LogInformation("TempReadingService running.");
+            logger.LogInformation($"{Name} running.");
 
             return Task.CompletedTask;
         }
 
-        private void ReadTemperature()
-        {
-            if (uart.IsOpened)
-            {
-                foreach (SensorObject sensor in sensors)
-                {
-                    float temp = sensor.PhysSensor.GetTemperature();
+        protected virtual void DoStartAsync(CancellationToken stoppingToken) { }
 
-                    tempCache.AddOrUpdate(sensor.SensorID, temp, (key, existingVal) =>
-                    {
-                        existingVal = temp;
-                        return existingVal;
-                    });
-                }
+        public Task StopAsync(CancellationToken stoppingToken)
+        {
+            logger.LogInformation($"{Name} is stopping.");
+            lock (lockAccess)
+            {
+                DoStopAsync(stoppingToken);
+                sensors?.Clear();
+                timer?.Change(Timeout.Infinite, 0);
             }
+
+            return Task.CompletedTask;
+        }
+
+        protected virtual void DoStopAsync(CancellationToken stoppingToken) { }
+
+        protected virtual void ReadTemperature()
+        {
+            AddValueToTempCache((-1, 0));
+        }
+
+        protected void AddValueToTempCache((long id, float temperature) value)
+        {
+            tempCache.AddOrUpdate(value.id, value.temperature, (key, existingVal) =>
+            {
+                existingVal = value.temperature;
+                return existingVal;
+            });
         }
 
         private void DoWork(object state)
@@ -108,11 +113,11 @@ namespace Services.Service
                 {
                     recodedDate = recodedDate.AddMinutes(settings.HistorySettings.MinuteInterval);
                 }
-            } 
+            }
             else if (settings.HistorySettings.MinuteInterval <= 0)
             {
                 recodedDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0);
-            } 
+            }
             else
             {
                 recodedDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
@@ -124,22 +129,7 @@ namespace Services.Service
 
         private void WriteTempToHistory(long sensorID, float temp)
         {
-            _dataBase.WriteTempToHistory(sensorID, temp, nextTimeForHistory);
-        }
-
-        public Task StopAsync(CancellationToken stoppingToken)
-        {
-            _logger.LogInformation("TempReadingService is stopping.");
-            lock (lockAccess)
-            {
-                sensors?.Clear();
-
-                uart?.Close();
-
-                _timer?.Change(Timeout.Infinite, 0);
-            }
-
-            return Task.CompletedTask;
+            dataBase.WriteTempToHistory(sensorID, temp, nextTimeForHistory);
         }
 
         public async Task<IEnumerable> LastMeasuredTemp()
@@ -203,26 +193,38 @@ namespace Services.Service
 
         public object SensorInfo(long sensorID)
         {
-            foreach (SensorObject item in sensors)
+            lock (lockAccess)
             {
-                if (item.SensorID == sensorID)
+                var sensorInfo = DoGetSensorObjectInfo(sensorID);
+                
+                if (sensorInfo != null)
                 {
-                    lock (lockAccess)
-                    {
-                        return new SensorInfoObj() { SensorID = item.SensorID, ROM = item.ROM, DeviceName = item.DeviceName, Info = item.PhysSensor.Info() };
-                    }
+                    return sensorInfo;
                 }
             }
 
-            throw new NullReferenceException("Sensor is not found");
+            throw new NullReferenceException($"Sensor with ID = {sensorID} is not found");
         }
 
-        public void Dispose()
+        protected virtual object DoGetSensorObjectInfo(long sensorID)
         {
-            uart?.Dispose();
-            _timer?.Dispose();
+            var sensor = sensors.FirstOrDefault(sn => sn.SensorID == sensorID);
+
+            if (sensor != null)
+            {
+                return new SensorObject() { SensorID = (sensor.SensorID), ROM = sensor.ROM, DeviceName = sensor.DeviceName };
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        public string Name => nameof(TempReadingService);
+        public virtual void Dispose()
+        {
+            timer?.Dispose();
+        }
+
+        public virtual string Name => nameof(TempReadingService);
     }
 }
