@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HomeWeather.Services
+namespace Interfaces
 {
     public interface ITempReader
     {
@@ -11,7 +11,6 @@ namespace HomeWeather.Services
         Task<IEnumerable> LastMeasuredTemp();
         Task<object> LastMeasuredTempBySensor(long snID);
         IEnumerable SensorsList();
-
         object SensorInfo(long sensorID);
     }
 }

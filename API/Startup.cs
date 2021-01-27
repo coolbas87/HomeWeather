@@ -1,17 +1,14 @@
-using HomeWeather.Controllers;
 using HomeWeather.Models;
 using HomeWeather.Services;
+using Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Services.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,13 +26,12 @@ namespace HomeWeather
         }
 
         public IConfiguration Configuration { get; }
-        private List<Type> TempReaders = new List<Type>() { typeof(TempReadingService), typeof(DummyTempReaderService) };
+        private readonly List<Type> TempReaders = new List<Type>() { typeof(TempReadingServiceUART), typeof(DummyTempReadingService), typeof(OpenWeatherTempReadingService) };
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<Settings>(Configuration);
-            services.AddDbContext<HWDbContext>(options => options.UseSqlServer(Configuration["DBConnection"]));
+            services.AddDbContext<HWDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DBConnection")));
             services.AddControllersWithViews();
             services.AddSwaggerGen(c =>
             {
@@ -43,9 +39,11 @@ namespace HomeWeather
             });
 
             Type serviceImplementer = TempReaders.FirstOrDefault(s => s.Name == Configuration["ServiceImplementer"]);
+            services.Configure<Settings>(Configuration);
             services.AddSingleton(serviceImplementer);
-            services.AddSingleton<ITempReader>(provider => (ITempReader)provider.GetService(serviceImplementer));
-            services.AddSingleton<IHostedService>(provider => (IHostedService)provider.GetService(serviceImplementer));
+            services.AddSingleton(provider => (ITempReader)provider.GetService(serviceImplementer));
+            services.AddSingleton(provider => (IHostedService)provider.GetService(serviceImplementer));
+            services.AddSingleton<IDataBaseOperation, DatabaseOperations>();
 
             services.AddCors();
         }
@@ -69,7 +67,7 @@ namespace HomeWeather
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeWeather API V1");
-                c.RoutePrefix = string.Empty;
+                c.RoutePrefix = "docs";
             });
             app.UseCors(options => options.AllowAnyOrigin());
 

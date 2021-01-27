@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HomeWeather.Models;
-using HomeWeather.Services;
-using Microsoft.AspNetCore.Http;
+﻿using Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace HomeWeather.Controllers
 {
@@ -14,12 +9,10 @@ namespace HomeWeather.Controllers
     public class TemperatureController : ControllerBase
     {
         private readonly ITempReader _tempReader;
-        private readonly HWDbContext _context;
 
-        public TemperatureController(ITempReader tempReader, HWDbContext context)
+        public TemperatureController(ITempReader tempReader)
         {
             _tempReader = tempReader;
-            _context = context;
         }
 
         // GET: api/Temperature
