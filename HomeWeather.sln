@@ -11,11 +11,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TempReaderModels", "TempRea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UART_TempReadingsService", "UART_TempReadingsService\UART_TempReadingsService.csproj", "{97DDBA91-2484-4910-A4E9-15ED9C7B7AD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TempReadingService", "TempReadingService\TempReadingService.csproj", "{A8BE2558-85AE-4995-8799-AC9E1D5FAEF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TempReadingService", "TempReadingService\TempReadingService.csproj", "{A8BE2558-85AE-4995-8799-AC9E1D5FAEF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DummyTempReadingService", "DummyTempReadingService\DummyTempReadingService.csproj", "{5A55D43A-5A27-48A9-B162-4B30609F3F5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyTempReadingService", "DummyTempReadingService\DummyTempReadingService.csproj", "{5A55D43A-5A27-48A9-B162-4B30609F3F5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWeatherTempReadingService", "OpenWeatherTempReadingService\OpenWeatherTempReadingService.csproj", "{C633DB7B-34AC-4CBC-8E5B-893FF1ECA081}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenWeatherTempReadingService", "OpenWeatherTempReadingService\OpenWeatherTempReadingService.csproj", "{C633DB7B-34AC-4CBC-8E5B-893FF1ECA081}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeWeather.Data", "HomeWeather.Data\HomeWeather.Data.csproj", "{7A919AD8-67BA-42DF-A27E-26FDD0B704B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "New", "New", "{FA1E7CAE-7632-415B-91A0-05C17A53D3C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeWeather.Domain", "HomeWeather.Domain\HomeWeather.Domain.csproj", "{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +57,21 @@ Global
 		{C633DB7B-34AC-4CBC-8E5B-893FF1ECA081}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C633DB7B-34AC-4CBC-8E5B-893FF1ECA081}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C633DB7B-34AC-4CBC-8E5B-893FF1ECA081}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A919AD8-67BA-42DF-A27E-26FDD0B704B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A919AD8-67BA-42DF-A27E-26FDD0B704B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A919AD8-67BA-42DF-A27E-26FDD0B704B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A919AD8-67BA-42DF-A27E-26FDD0B704B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7A919AD8-67BA-42DF-A27E-26FDD0B704B0} = {FA1E7CAE-7632-415B-91A0-05C17A53D3C0}
+		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58} = {FA1E7CAE-7632-415B-91A0-05C17A53D3C0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82F03308-1690-4A48-A405-509CE2842AA3}
