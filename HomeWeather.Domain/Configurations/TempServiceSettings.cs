@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HomeWeather.Domain.Configurations
+﻿namespace HomeWeather.Domain.Configurations
 {
-    public class TempService
+    public class TempServiceSettings
     {
-        public string COMPort { get; set; }
         public int RefreshTempInterval { get; set; }
         public HistorySettings HistorySettings { get; set; }
     }

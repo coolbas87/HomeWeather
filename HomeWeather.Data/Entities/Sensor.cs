@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HomeWeather.Data.Entities
 {
-    public class Sensors : IEntity
+    public class Sensor : IEntity
     {
         public long snID { get; set; }
         public string Name { get; set; }

@@ -16,7 +16,6 @@ namespace HomeWeather.ServiceExtension
                     .AllowAnyHeader()
                     .WithExposedHeaders("Token-Expired", "InvalidRefreshToken", "InvalidCredentials")
                     .AllowAnyOrigin()
-                    .AllowCredentials()
                     .Build());
             });
     }

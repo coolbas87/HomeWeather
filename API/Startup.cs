@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HomeWeather
 {
@@ -13,8 +15,9 @@ namespace HomeWeather
         public Startup(IConfiguration configuration)
         {
             var builder = new ConfigurationBuilder()
-                            .AddJsonFile("Settings.json", optional: false, reloadOnChange: true)
+                            .AddJsonFile("UARTSettings.json", optional: true, reloadOnChange: false)
                             .AddJsonFile("OpenWeatherSettings.json", optional: true, reloadOnChange: true)
+                            .AddJsonFile("TempServiceSettings.json", optional: true, reloadOnChange: false)
                             .AddConfiguration(configuration);
             Configuration = builder.Build();
         }
@@ -47,11 +50,10 @@ namespace HomeWeather
             }
             else
             {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
+            app.UseExceptionMiddleware();
             //app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("CorsPolicy");

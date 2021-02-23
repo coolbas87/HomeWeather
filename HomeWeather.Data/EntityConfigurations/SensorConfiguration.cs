@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HomeWeather.Data.Context
 {
-    public class SensorsConfiguration : IEntityTypeConfiguration<Sensors>
+    public class SensorConfiguration : IEntityTypeConfiguration<Sensor>
     {
-        public void Configure(EntityTypeBuilder<Sensors> builder)
+        public void Configure(EntityTypeBuilder<Sensor> builder)
         {
             builder.HasKey(sensor => sensor.snID);
 

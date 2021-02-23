@@ -16,22 +16,43 @@ namespace HomeWeather.ServiceExtension
     public static class ServicesExtension
     {
         private static bool isInitializedConfiguration = false;
-        private static readonly List<Type> TempReaders = new List<Type>() { typeof(UART_TempReadingService), typeof(DummyTempReadingService), typeof(OpenWeatherTempReadingService) };
+
+        public static Type FindType(string typeName)
+        {
+            var type = Type.GetType(typeName);
+            if (type != null)
+                return type;
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = assembly.GetType(typeName);
+                if (type != null)
+                    return type;
+                foreach (var assemblyType in assembly.GetTypes())
+                {
+                    if (assemblyType.Name == typeName)
+                        return assemblyType;
+                }
+            }
+            return null;
+        }
 
         public static void AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             if (!isInitializedConfiguration)
                 InitializeConfigurations(services, configuration);
 
-            services.AddScoped<IRepository<Sensors>, Repository<Sensors>>();
-            services.AddScoped<IUnitOfWork<Sensors>, UnitOfWork<Sensors>>();
+            services.AddScoped<IRepository<Sensor>, Repository<Sensor>>();
+            services.AddScoped<IUnitOfWork<Sensor>, UnitOfWork<Sensor>>();
             services.AddScoped<IRepository<TempHistory>, Repository<TempHistory>>();
             services.AddScoped<IUnitOfWork<TempHistory>, UnitOfWork<TempHistory>>();
 
-            Type serviceImplementer = TempReaders.FirstOrDefault(s => s.Name == configuration["ServiceImplementer"]);
+            services.AddScoped<ISensorService, SensorService>();
+            services.AddScoped<ITempHistoryService, TempHistoryService>();
 
+            Type serviceImplementer = FindType(configuration["ServiceImplementer"]);
             services.AddSingleton(serviceImplementer);
-            services.AddSingleton(provider => (ITempReader)provider.GetService(serviceImplementer));
+            services.AddSingleton(provider => (ISensorTempReader)provider.GetService(serviceImplementer));
+            services.AddSingleton(provider => (IPhysSensorInfo)provider.GetService(serviceImplementer));
             services.AddSingleton(provider => (IHostedService)provider.GetService(serviceImplementer));            
         }
 
@@ -39,8 +60,10 @@ namespace HomeWeather.ServiceExtension
         {
             if (!isInitializedConfiguration)
             {
-                services.Configure<TempService>(configuration);
                 services.Configure<OpenWeatherMap>(configuration);
+                services.Configure<TempServiceSettings>(configuration);
+                services.Configure<UARTSettings>(configuration);
+                isInitializedConfiguration = true;
             }
         }
     }

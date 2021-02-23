@@ -2,6 +2,7 @@
 using HomeWeather.Data.Interfaces;
 using HomeWeather.Domain.Configurations;
 using HomeWeather.Domain.DTO;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -21,27 +22,32 @@ namespace HomeWeather.Domain.Services.Implementation
 
         public OpenWeatherTempReadingService(
             ILogger<TempReadingService> logger,
-            IUnitOfWork<Sensors> sensorsUnitOfWork,
-            IUnitOfWork<TempHistory> tempHistUnitOfWork,
-            IOptions<TempService> options,
-            IOptions<OpenWeatherMap> openWeatherMapOptions) : base(logger, sensorsUnitOfWork, tempHistUnitOfWork, options) 
+            IServiceScopeFactory scopeFactory,
+            IOptions<TempServiceSettings> options,
+            IOptions<OpenWeatherMap> openWeatherMapOptions) : base(logger, scopeFactory, options) 
         {
             this.openWeatherMapOptions = openWeatherMapOptions.Value;
         }
 
         protected override void DoStartAsync(object stoppingToken)
         {
+            Logger.LogInformation($"{openWeatherMapOptions.Cities.Length} connected sensor(s)");
             client.BaseAddress = new Uri("http://api.openweathermap.org/data/2.5/");
 
             for (int i = 0; i < openWeatherMapOptions.Cities.Length; i++)
             {
                 string rom = openWeatherMapOptions.Cities[i].ToString();
-                var dbSensor = SensorsUnitOfWork.GetRepository().Query().FirstOrDefault(sn => sn.ROM == rom);
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    IUnitOfWork<Sensor> sensorsUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork<Sensor>>();
+                    var dbSensor = sensorsUnitOfWork.GetRepository().Query().FirstOrDefault(sn => sn.ROM == rom);
 
-                if (dbSensor == null)
-                    Sensors.Add(new SensorDTO() { SensorID = -i - 1, ROM = rom, DeviceName = $"OpenWeather sensor for city id {rom}" });
-                else
-                    Sensors.Add(new SensorDTO() { SensorID = dbSensor.snID, ROM = rom, DeviceName = $"OpenWeather sensor for city id {rom}" });
+                    if (dbSensor == null)
+                        Sensors.Add(new SensorDTO() { SensorID = -i - 1, ROM = rom, DeviceName = $"OpenWeather sensor for city id {rom}" });
+                    else
+                        Sensors.Add(new SensorDTO() { SensorID = dbSensor.snID, ROM = rom, DeviceName = $"OpenWeather sensor for city id {rom}" });
+                    Logger.LogInformation($"Added to list sensor with ROM (CityID): {rom}");
+                }
             }
         }
 
@@ -90,7 +96,5 @@ namespace HomeWeather.Domain.Services.Implementation
                 }
             }
         }
-
-        public override string Name => nameof(OpenWeatherTempReadingService);
     }
 }

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HomeWeather.Data.Entities;
+using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using HomeWeather.Models;
 
 namespace HomeWeather.Controllers
 {
@@ -13,39 +14,25 @@ namespace HomeWeather.Controllers
     [ApiController]
     public class TempHistoryController : ControllerBase
     {
-        private readonly HWDbContext _context;
+        private readonly ITempHistoryService tempHistoryService;
 
-        public TempHistoryController(HWDbContext context)
+        public TempHistoryController(ITempHistoryService tempHistoryService)
         {
-            _context = context;
+            this.tempHistoryService = tempHistoryService;
         }
 
         // GET: api/TempHistory/2020-01-01/2020-01-02
         [HttpGet("{from:DateTime}/{to:DateTime}")]
-        public async Task<ActionResult<IEnumerable<TempHistory>>> GetTempHistory(DateTime from, DateTime to)
+        public IActionResult GetTempHistory(DateTime from, DateTime to)
         {
-            var tempHistory = await _context.TempHistory.Include(th => th.Sensors).AsQueryable().Where(th => ((th.Date >= from) && (th.Date < to.AddDays(1)))).ToListAsync();
-
-            if (tempHistory == null)
-            {
-                return NotFound();
-            }
-
-            return tempHistory;
+            return Ok(tempHistoryService.GetTempHistory(from, to));
         }
 
         // GET: api/TempHistory/5/2020-01-01/2020-01-02
         [HttpGet("{id}/{from:DateTime}/{to:DateTime}")]
-        public async Task<ActionResult<IEnumerable<TempHistory>>> GetTempHistory(long id, DateTime from, DateTime to)
+        public IActionResult GetTempHistory(long id, DateTime from, DateTime to)
         {
-            var tempHistory = await _context.TempHistory.Include(th => th.Sensors).AsQueryable().Where(th => ((th.snID == id) && (th.Date >= from) && (th.Date < to.AddDays(1)))).ToListAsync();
-
-            if (tempHistory == null)
-            {
-                return NotFound();
-            }
-
-            return tempHistory;
+            return Ok(tempHistoryService.GetTempHistoryBySensor(id, from, to));
         }
     }
 }

@@ -10,7 +10,7 @@ namespace HomeWeather.Data.Entities
     {
         public int thID { get; set; }
         public long snID { get; set; }
-        public Sensors Sensors { get; set; }
+        public Sensor Sensors { get; set; }
         public float Temperature { get; set; }
         public DateTime Date { get; set; }
     }

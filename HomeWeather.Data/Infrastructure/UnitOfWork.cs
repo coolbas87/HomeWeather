@@ -13,7 +13,7 @@ namespace HomeWeather.Data.Infrastructure
 
         public UnitOfWork(HomeWeatherContext context) => this.context = context;
 
-        public DbContext db => throw new NotImplementedException();
+        public DbContext db => context;
 
         public void Dispose(bool disposing)
         {

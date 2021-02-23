@@ -10,10 +10,10 @@ namespace HomeWeather.Domain.Services.Interfaces
 {
     public interface ISensorService
     {
-        IEnumerable<Sensors> GetSensors();
-        Sensors GetSensorById(long sensorId);
-        Sensors AddSensor(SensorDTO sensorDto);
-        Sensors UpdateSensor(SensorDTO sensorDto);
+        IEnumerable<Sensor> GetSensors();
+        Sensor GetSensorById(long sensorId);
+        Sensor AddSensor(SensorDTO sensorDto);
+        Sensor UpdateSensor(SensorDTO sensorDto);
         bool DeleteSensor(long sensorId);
     }
 }

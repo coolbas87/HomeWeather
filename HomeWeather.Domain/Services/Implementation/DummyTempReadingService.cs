@@ -2,6 +2,7 @@
 using HomeWeather.Data.Interfaces;
 using HomeWeather.Domain.Configurations;
 using HomeWeather.Domain.DTO;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -11,23 +12,31 @@ namespace HomeWeather.Domain.Services.Implementation
 {
     public class DummyTempReadingService : TempReadingService
     {
+        private readonly int sensorsCount = 2;
+
         public DummyTempReadingService(
             ILogger<TempReadingService> logger,
-            IUnitOfWork<Sensors> sensorsUnitOfWork,
-            IUnitOfWork<TempHistory> tempHistUnitOfWork,
-            IOptions<TempService> options) : base(logger, sensorsUnitOfWork, tempHistUnitOfWork, options) { }
+            IServiceScopeFactory scopeFactory,
+            IOptions<TempServiceSettings> options) : base(logger, scopeFactory, options) { }
 
         protected override void DoStartAsync(object stoppingToken)
         {
-            for (int i = 0; i <= 1; i++)
+            Logger.LogInformation($"{sensorsCount} connected sensor(s)");
+
+            for (int i = 0; i < sensorsCount; i++)
             {
                 int rndROM = 111111111 + i;
-                var dbSensor = SensorsUnitOfWork.GetRepository().Query().FirstOrDefault(sn => sn.ROM == rndROM.ToString());
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    IUnitOfWork<Sensor> sensorsUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork<Sensor>>();
+                    var dbSensor = sensorsUnitOfWork.GetRepository().Query().FirstOrDefault(sn => sn.ROM == rndROM.ToString());
 
-                if (dbSensor == null)
-                    Sensors.Add(new SensorDTO() { SensorID = rndROM, Name = $"Dummy sensor {i}", ROM = rndROM.ToString(), DeviceName = $"Sensor {rndROM}" });
-                else
-                    Sensors.Add(new SensorDTO() { SensorID = dbSensor.snID, Name = dbSensor.Name, ROM = dbSensor.ROM, DeviceName = $"Sensor {rndROM}" });
+                    if (dbSensor == null)
+                        Sensors.Add(new SensorDTO() { SensorID = rndROM, Name = $"Dummy sensor {i}", ROM = rndROM.ToString(), DeviceName = $"Sensor {rndROM}" });
+                    else
+                        Sensors.Add(new SensorDTO() { SensorID = dbSensor.snID, Name = dbSensor.Name, ROM = dbSensor.ROM, DeviceName = $"Sensor {rndROM}" });
+                    Logger.LogInformation($"Added to list sensor with ROM: {rndROM}");
+                }
             }
         }
 
@@ -42,7 +51,5 @@ namespace HomeWeather.Domain.Services.Implementation
                 AddValueToTempCache((id: sensor.SensorID, temperature: temp));
             }
         }
-
-        public override string Name => nameof(DummyTempReadingService);
     }
 }

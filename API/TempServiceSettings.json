@@ -1,5 +1,4 @@
 {
-  "COMPort": "COM3",
   "RefreshTempInterval": 60,
   "HistorySettings": {
     "HourInterval": 0,

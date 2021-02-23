@@ -11,32 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.2">
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Migrations\20200430141441_Initial.cs" />
-    <Compile Remove="Migrations\20200430141441_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200430205747_Initial.cs" />
-    <Compile Remove="Migrations\20200430205747_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200503141315_Init.cs" />
-    <Compile Remove="Migrations\20200503141315_Init.Designer.cs" />
-    <Compile Remove="Migrations\20200503171435_Init.cs" />
-    <Compile Remove="Migrations\20200503171435_Init.Designer.cs" />
-    <Compile Remove="Migrations\20200503171838_Init.cs" />
-    <Compile Remove="Migrations\20200503171838_Init.Designer.cs" />
-    <Compile Remove="Migrations\20200503172227_Init.cs" />
-    <Compile Remove="Migrations\20200503172227_Init.Designer.cs" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.7" />
   </ItemGroup>
 
   <ItemGroup>

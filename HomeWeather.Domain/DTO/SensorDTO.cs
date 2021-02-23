@@ -6,7 +6,6 @@ namespace HomeWeather.Domain.DTO
     {
         public long SensorID { get; set; }
         public string ROM { get; set; }
-        [JsonIgnore]
         public string Name { get; set; }
         public string DeviceName { get; set; }
         public string Info { get; set; }

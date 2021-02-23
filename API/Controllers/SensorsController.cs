@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HomeWeather.Models;
-using Microsoft.AspNetCore.Http;
+﻿using HomeWeather.Domain.DTO;
+using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HomeWeather.Controllers
 {
@@ -13,97 +8,50 @@ namespace HomeWeather.Controllers
     [ApiController]
     public class SensorsController : ControllerBase
     {
-        private readonly HWDbContext _context;
+        private readonly ISensorService sensorService;
 
-        public SensorsController(HWDbContext context)
+        public SensorsController(ISensorService sensorService)
         {
-            _context = context;
+            this.sensorService = sensorService;
         }
 
         // GET: api/Sensors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Sensors>>> GetSensors()
+        public IActionResult GetSensors()
         {
-            return await _context.Sensors.ToListAsync();
+            return Ok(sensorService.GetSensors());
         }
 
         // GET: api/Sensors/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Sensors>> GetSensors(long id)
+        public IActionResult GetSensors(long id)
         {
-            var sensors = await _context.Sensors.FindAsync(id);
-
-            if (sensors == null)
-            {
-                return NotFound();
-            }
-
-            return sensors;
+            return Ok(sensorService.GetSensorById(id));
         }
 
-        // POST: api/Sensors
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        //POST: api/Sensors
+        //To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Sensors>> PostSensors(Sensors sensors)
+        public IActionResult PostSensors(SensorDTO sensor)
         {
-            _context.Sensors.Add(sensors);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSensors", new { id = sensors.snID }, sensors);
+            return Ok(sensorService.AddSensor(sensor));
         }
 
         // PUT: api/Sensors/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSensors(long id, Sensors sensors)
+        public IActionResult PutSensors(SensorDTO sensor)
         {
-            if (id != sensors.snID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(sensors).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SensorsExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(sensorService.UpdateSensor(sensor));
         }
 
         // DELETE: api/Sensors/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Sensors>> DeleteSensors(long id)
+        public IActionResult DeleteSensors(long id)
         {
-            var sensors = await _context.Sensors.FindAsync(id);
-            if (sensors == null)
-            {
-                return NotFound();
-            }
-
-            _context.Sensors.Remove(sensors);
-            await _context.SaveChangesAsync();
-
-            return sensors;
-        }
-
-        private bool SensorsExists(long id)
-        {
-            return _context.Sensors.Any(e => e.snID == id);
+            return Ok(sensorService.DeleteSensor(id));
         }
     }
 }
