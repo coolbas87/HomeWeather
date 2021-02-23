@@ -11,7 +11,7 @@ namespace HomeWeather.Data.Entities
         public long snID { get; set; }
         public string Name { get; set; }
         public string ROM { get; set; }
-        public DateTime CreateAt { get; set; }
-        public DateTime EditAt { get; set; }
+        public DateTime? CreateAt { get; set; }
+        public DateTime? EditAt { get; set; }
     }
 }
