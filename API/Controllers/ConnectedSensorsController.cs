@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HomeWeather.Services;
-using Interfaces;
-using Microsoft.AspNetCore.Http;
+﻿using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace HomeWeather.Controllers
 {
@@ -13,25 +8,25 @@ namespace HomeWeather.Controllers
     [ApiController]
     public class ConnectedSensorsController : ControllerBase
     {
-        private readonly ITempReader _tempReader;
+        private readonly IPhysSensorInfo sensorInfo;
 
-        public ConnectedSensorsController(ITempReader tempReader)
+        public ConnectedSensorsController(IPhysSensorInfo sensorInfo)
         {
-            _tempReader = tempReader;
+            this.sensorInfo = sensorInfo;
         }
 
         // GET: api/ConnectedSensors
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            return Ok(_tempReader.SensorsList());
+            return Ok(await sensorInfo.GetSensors());
         }
 
         // GET: api/ConnectedSensors/5
         [HttpGet("{id}", Name = "Get")]
-        public IActionResult Get(long id)
+        public async Task<IActionResult> Get(long id)
         {
-            return Ok(_tempReader.SensorInfo(id));
+            return Ok(await sensorInfo.GetSensorByID(id));
         }
     }
 }

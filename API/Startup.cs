@@ -1,17 +1,12 @@
-using HomeWeather.Models;
-using HomeWeather.Services;
-using Interfaces;
+using HomeWeather.ServiceExtension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Services.Service;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HomeWeather
 {
@@ -20,32 +15,30 @@ namespace HomeWeather
         public Startup(IConfiguration configuration)
         {
             var builder = new ConfigurationBuilder()
-                            .AddJsonFile("Settings.json")
+                            .AddJsonFile("UARTSettings.json", optional: true, reloadOnChange: false)
+                            .AddJsonFile("OpenWeatherSettings.json", optional: true, reloadOnChange: true)
+                            .AddJsonFile("TempServiceSettings.json", optional: true, reloadOnChange: false)
                             .AddConfiguration(configuration);
             Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
-        private readonly List<Type> TempReaders = new List<Type>() { typeof(TempReadingServiceUART), typeof(DummyTempReadingService), typeof(OpenWeatherTempReadingService) };
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<HWDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DBConnection")));
-            services.AddControllersWithViews();
+            services.AddDbContext(Configuration);
+            services.AddControllers();
+            services.InitializeConfigurations(Configuration);
+            services.AddServices(Configuration);
+            services.AddCorsSettings();
+            services.AddLogging();
+
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HomeWeather API", Version = "v1" });
             });
-
-            Type serviceImplementer = TempReaders.FirstOrDefault(s => s.Name == Configuration["ServiceImplementer"]);
-            services.Configure<Settings>(Configuration);
-            services.AddSingleton(serviceImplementer);
-            services.AddSingleton(provider => (ITempReader)provider.GetService(serviceImplementer));
-            services.AddSingleton(provider => (IHostedService)provider.GetService(serviceImplementer));
-            services.AddSingleton<IDataBaseOperation, DatabaseOperations>();
-
-            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,28 +50,27 @@ namespace HomeWeather
             }
             else
             {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
+            app.UseExceptionMiddleware();
             //app.UseHttpsRedirection();
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeWeather API V1");
-                c.RoutePrefix = "docs";
-            });
-            app.UseCors(options => options.AllowAnyOrigin());
-
             app.UseRouting();
-
+            app.UseCors("CorsPolicy");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeWeather API V1");
+                c.RoutePrefix = "docs";
+            });
+
+
         }
     }
 }

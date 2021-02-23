@@ -1,4 +1,4 @@
-﻿using Interfaces;
+﻿using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -8,25 +8,25 @@ namespace HomeWeather.Controllers
     [ApiController]
     public class TemperatureController : ControllerBase
     {
-        private readonly ITempReader _tempReader;
+        private readonly ISensorTempReader tempReader;
 
-        public TemperatureController(ITempReader tempReader)
+        public TemperatureController(ISensorTempReader tempReader)
         {
-            _tempReader = tempReader;
+            this.tempReader = tempReader;
         }
 
         // GET: api/Temperature
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            return Ok(await _tempReader.LastMeasuredTemp());
+            return Ok(await tempReader.GetTempAllSensors());
         }
 
         // GET: api/Temperature/5
         [HttpGet("{id}")]
         public async Task<ActionResult> Get(long id)
         {
-            return Ok(await _tempReader.LastMeasuredTempBySensor(id));
+            return Ok(await tempReader.GetTempBySensor(id));
         }
     }
 }
