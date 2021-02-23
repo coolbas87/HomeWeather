@@ -159,6 +159,7 @@ namespace HomeWeather.Domain.Services.Implementation
                         Temperature = temp,
                         Date = nextTimeForHistory
                     });
+                    tempHistUnitOfWork.SaveChanges();
                 }
             }
         }
