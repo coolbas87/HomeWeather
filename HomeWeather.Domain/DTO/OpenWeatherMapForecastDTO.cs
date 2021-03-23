@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace HomeWeather.Domain.DTO
 {
-    public class OpenWeatherMapForecastDTO : WeatherForecastDTO
+    public class OpenWeatherMapForecastDTO
     {
         public float lat { get; init; }
         public float lon { get; init; }

@@ -48,7 +48,7 @@ namespace HomeWeather.ServiceExtension
 
             services.AddScoped<ISensorService, SensorService>();
             services.AddScoped<ITempHistoryService, TempHistoryService>();
-            services.AddScoped<IWeatherForecastService, OpenWeatherForecastService>();
+            services.AddSingleton<IWeatherForecastService, OpenWeatherForecastService>();
 
             Type serviceImplementer = FindType(configuration["ServiceImplementer"]);
             services.AddSingleton(serviceImplementer);
