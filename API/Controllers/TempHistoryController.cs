@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HomeWeather.Data.Entities;
-using HomeWeather.Domain.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
+﻿using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace HomeWeather.Controllers
 {

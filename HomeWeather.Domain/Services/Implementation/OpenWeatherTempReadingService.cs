@@ -18,13 +18,13 @@ namespace HomeWeather.Domain.Services.Implementation
     public class OpenWeatherTempReadingService : TempReadingService
     {
         static readonly HttpClient client = new HttpClient();
-        private readonly OpenWeatherMap openWeatherMapOptions;
+        private readonly OpenWeatherSettings openWeatherMapOptions;
 
         public OpenWeatherTempReadingService(
             ILogger<TempReadingService> logger,
             IServiceScopeFactory scopeFactory,
             IOptions<TempServiceSettings> options,
-            IOptions<OpenWeatherMap> openWeatherMapOptions) : base(logger, scopeFactory, options) 
+            IOptions<OpenWeatherSettings> openWeatherMapOptions) : base(logger, scopeFactory, options) 
         {
             this.openWeatherMapOptions = openWeatherMapOptions.Value;
         }
@@ -84,8 +84,8 @@ namespace HomeWeather.Domain.Services.Implementation
                     try
                     {
                         CityWeatherDTO weatherForecast = JsonSerializer.Deserialize<CityWeatherDTO>(json);
-                        sensor.Name = weatherForecast.Name;
-                        AddValueToTempCache((id: sensor.SensorID, temperature: weatherForecast.Main.Temp));
+                        sensor.Name = weatherForecast.name;
+                        AddValueToTempCache((id: sensor.SensorID, temperature: weatherForecast.main.temp));
                     }
                     catch (Exception e)
                     {

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWeather.Data", "HomeWea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWeather.Domain", "HomeWeather.Domain\HomeWeather.Domain.csproj", "{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWeather.UnitTests", "HomeWeather.Tests\HomeWeather.UnitTests.csproj", "{DFE00069-6729-4FDE-AD16-7C98D828AFDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21381DEE-7FF1-4408-8DBD-790BAB3A1F58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFE00069-6729-4FDE-AD16-7C98D828AFDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE00069-6729-4FDE-AD16-7C98D828AFDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE00069-6729-4FDE-AD16-7C98D828AFDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE00069-6729-4FDE-AD16-7C98D828AFDB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,14 +17,14 @@ namespace HomeWeather.Controllers
 
         // GET: api/Temperature
         [HttpGet]
-        public async Task<ActionResult> Get()
+        public async Task<IActionResult> Get()
         {
             return Ok(await tempReader.GetTempAllSensors());
         }
 
         // GET: api/Temperature/5
         [HttpGet("{id}")]
-        public async Task<ActionResult> Get(long id)
+        public async Task<IActionResult> Get(long id)
         {
             return Ok(await tempReader.GetTempBySensor(id));
         }

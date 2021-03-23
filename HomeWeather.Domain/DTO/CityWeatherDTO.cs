@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HomeWeather.Domain.DTO
+﻿namespace HomeWeather.Domain.DTO
 {
     public class CityWeatherDTO
     {
-        public Main Main { get; set; }
-        public int ID { get; set; }
-        public string Name { get; set; }
+        public Main main { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
     }
 
     public class Main
     {
-        public float Temp { get; set; }
-        public float Feels_like { get; set; }
+        public float temp { get; set; }
+        public float feels_like { get; set; }
     }
 }

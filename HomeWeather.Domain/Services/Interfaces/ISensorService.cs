@@ -12,8 +12,8 @@ namespace HomeWeather.Domain.Services.Interfaces
     {
         IEnumerable<Sensor> GetSensors();
         Sensor GetSensorById(long sensorId);
-        Sensor AddSensor(SensorDTO sensorDto);
-        Sensor UpdateSensor(SensorDTO sensorDto);
+        Sensor AddSensor(Sensor sensor);
+        Sensor UpdateSensor(Sensor sensor);
         bool DeleteSensor(long sensorId);
     }
 }

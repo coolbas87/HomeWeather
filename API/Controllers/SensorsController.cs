@@ -1,4 +1,4 @@
-﻿using HomeWeather.Domain.DTO;
+﻿using HomeWeather.Data.Entities;
 using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +33,7 @@ namespace HomeWeather.Controllers
         //To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public IActionResult PostSensors(SensorDTO sensor)
+        public IActionResult PostSensors(Sensor sensor)
         {
             return Ok(sensorService.AddSensor(sensor));
         }
@@ -42,7 +42,7 @@ namespace HomeWeather.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public IActionResult PutSensors(SensorDTO sensor)
+        public IActionResult PutSensors(Sensor sensor)
         {
             return Ok(sensorService.UpdateSensor(sensor));
         }

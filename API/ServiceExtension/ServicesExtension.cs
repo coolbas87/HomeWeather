@@ -48,6 +48,7 @@ namespace HomeWeather.ServiceExtension
 
             services.AddScoped<ISensorService, SensorService>();
             services.AddScoped<ITempHistoryService, TempHistoryService>();
+            services.AddScoped<IWeatherForecastService, OpenWeatherForecastService>();
 
             Type serviceImplementer = FindType(configuration["ServiceImplementer"]);
             services.AddSingleton(serviceImplementer);
@@ -60,7 +61,7 @@ namespace HomeWeather.ServiceExtension
         {
             if (!isInitializedConfiguration)
             {
-                services.Configure<OpenWeatherMap>(configuration);
+                services.Configure<OpenWeatherSettings>(configuration);
                 services.Configure<TempServiceSettings>(configuration);
                 services.Configure<UARTSettings>(configuration);
                 isInitializedConfiguration = true;

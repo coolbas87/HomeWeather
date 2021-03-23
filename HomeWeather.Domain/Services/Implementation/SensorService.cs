@@ -17,18 +17,12 @@ namespace HomeWeather.Domain.Services.Implementation
             this.unitOfWork = unitOfWork;
         }
 
-        public Sensor AddSensor(SensorDTO sensorDto)
+        public Sensor AddSensor(Sensor sensor)
         {
-            var newSensor = new Sensor
-            {
-                Name = sensorDto.Name,
-                ROM = sensorDto.ROM
-            };
-
-            var sensor = unitOfWork.GetRepository().Add(newSensor);
+            var newSensor = unitOfWork.GetRepository().Add(sensor);
             unitOfWork.SaveChanges();
 
-            return sensor;
+            return newSensor;
         }
 
         public bool DeleteSensor(long sensorId)
@@ -56,9 +50,9 @@ namespace HomeWeather.Domain.Services.Implementation
             return unitOfWork.GetRepository().Query();
         }
 
-        public Sensor UpdateSensor(SensorDTO sensorDto)
+        public Sensor UpdateSensor(Sensor sensor)
         {
-            if (sensorDto == null)
+            if (sensor == null)
             {
                 throw new Exceptions.AppException("Received sensor is null")
                 {
@@ -66,18 +60,18 @@ namespace HomeWeather.Domain.Services.Implementation
                 };
             }
 
-            var entity = unitOfWork.GetRepository().GetById(sensorDto.SensorID);
+            var entity = unitOfWork.GetRepository().GetById(sensor.snID);
 
             if (entity == null)
             {
-                throw new Exceptions.AppException($"This entity id - {sensorDto.SensorID} wasn't found")
+                throw new Exceptions.AppException($"This entity id - {sensor.snID} wasn't found")
                 {
                     StatusCode = (int)HttpStatusCode.NotFound
                 };
             }
 
-            entity.Name = sensorDto.Name;
-            entity.ROM = sensorDto.ROM;
+            entity.Name = sensor.Name;
+            entity.ROM = sensor.ROM;
             entity.EditAt = DateTime.Now;
 
             var newEntity = unitOfWork.GetRepository().Update(entity);
