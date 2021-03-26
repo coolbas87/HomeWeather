@@ -1,4 +1,5 @@
 ﻿using HomeWeather.Data.Entities;
+using HomeWeather.Data.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeWeather.Data.Context
@@ -12,11 +13,13 @@ namespace HomeWeather.Data.Context
 
         public DbSet<TempHistory> TempHistory { get; set; }
         public DbSet<Sensor> Sensors { get; set; }
+        public DbSet<TelegramBotTrustedUser> TelegramBotTrustedUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new SensorConfiguration());
             modelBuilder.ApplyConfiguration(new TempHistoryConfiguration());
+            modelBuilder.ApplyConfiguration(new TelegramBotTrustedUserConfiguration());
             modelBuilder.HasSequence<long>("thID");
             modelBuilder.Entity<TempHistory>()
                 .Property(th => th.thID)
@@ -29,6 +32,11 @@ namespace HomeWeather.Data.Context
             modelBuilder.Entity<Sensor>()
                 .Property(s => s.CreateAt)
                 .HasDefaultValueSql("getdate()");
+
+            modelBuilder.HasSequence<long>("tbtuID");
+            modelBuilder.Entity<TelegramBotTrustedUser>()
+                .Property(tb => tb.tbtuID)
+                .HasDefaultValueSql($"NEXT VALUE FOR tbtuID");
         }
     }
 }

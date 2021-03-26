@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HomeWeather.Data.Context
+namespace HomeWeather.Data.EntityConfigurations
 {
     public class SensorConfiguration : IEntityTypeConfiguration<Sensor>
     {

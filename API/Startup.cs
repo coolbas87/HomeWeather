@@ -18,6 +18,7 @@ namespace HomeWeather
                             .AddJsonFile("UARTSettings.json", optional: true, reloadOnChange: false)
                             .AddJsonFile("OpenWeatherSettings.json", optional: true, reloadOnChange: true)
                             .AddJsonFile("TempServiceSettings.json", optional: true, reloadOnChange: false)
+                            .AddJsonFile("TelegramBotSettings.json", optional: true, reloadOnChange: true)
                             .AddConfiguration(configuration);
             Configuration = builder.Build();
         }

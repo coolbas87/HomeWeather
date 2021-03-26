@@ -8,8 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace HomeWeather.ServiceExtension
 {
@@ -45,10 +43,14 @@ namespace HomeWeather.ServiceExtension
             services.AddScoped<IUnitOfWork<Sensor>, UnitOfWork<Sensor>>();
             services.AddScoped<IRepository<TempHistory>, Repository<TempHistory>>();
             services.AddScoped<IUnitOfWork<TempHistory>, UnitOfWork<TempHistory>>();
+            services.AddScoped<IRepository<TelegramBotTrustedUser>, Repository<TelegramBotTrustedUser>>();
+            services.AddScoped<IUnitOfWork<TelegramBotTrustedUser>, UnitOfWork<TelegramBotTrustedUser>>();
 
             services.AddScoped<ISensorService, SensorService>();
             services.AddScoped<ITempHistoryService, TempHistoryService>();
             services.AddSingleton<IWeatherForecastService, OpenWeatherForecastService>();
+            services.AddSingleton<IBotService, TelegramBotService>();
+            services.AddSingleton<IHostedService, TelegramBotService>();
 
             Type serviceImplementer = FindType(configuration["ServiceImplementer"]);
             services.AddSingleton(serviceImplementer);
@@ -64,6 +66,7 @@ namespace HomeWeather.ServiceExtension
                 services.Configure<OpenWeatherSettings>(configuration);
                 services.Configure<TempServiceSettings>(configuration);
                 services.Configure<UARTSettings>(configuration);
+                services.Configure<TelegramBotSettings>(configuration);
                 isInitializedConfiguration = true;
             }
         }
