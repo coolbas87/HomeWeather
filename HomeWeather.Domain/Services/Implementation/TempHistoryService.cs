@@ -23,6 +23,7 @@ namespace HomeWeather.Domain.Services.Implementation
                     sensor => sensor.Sensors
                     )
                 .Where(tempHistory => (tempHistory.Date >= from) && (tempHistory.Date < to.AddDays(1)))
+                .OrderByDescending(x => x.Date)
                 .ToList();
             return history;
         }
@@ -34,6 +35,7 @@ namespace HomeWeather.Domain.Services.Implementation
                     sensor => sensor.Sensors
                     )
                 .Where(tempHistory => (tempHistory.snID == sensorId) && (tempHistory.Date >= from) && (tempHistory.Date < to.AddDays(1)))
+                .OrderByDescending(x => x.Date)
                 .ToList();
             return history;
         }
