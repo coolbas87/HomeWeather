@@ -27,6 +27,7 @@ namespace HomeWeather.Domain.Services.Implementation
         private bool isStopped = true;
         private readonly ILogger<TelegramBotService> logger;
         private readonly ISensorTempReader sensorTempReader;
+        private readonly IWeatherForecastService weatherForecastService;
         private readonly IPhysSensorInfo physSensorInfo;
         private readonly IServiceScopeFactory scopeFactory;
         private readonly TelegramBotClient botClient;
@@ -42,15 +43,17 @@ namespace HomeWeather.Domain.Services.Implementation
 
 
         public TelegramBotService(
-            ILogger<TelegramBotService> logger, 
-            ISensorTempReader sensorTempReader, 
+            ILogger<TelegramBotService> logger,
+            ISensorTempReader sensorTempReader,
             IPhysSensorInfo physSensorInfo,
+            IWeatherForecastService weatherForecastService,
             IServiceScopeFactory scopeFactory,
             IOptions<TelegramBotSettings> options)
         {
             this.logger = logger;
             this.sensorTempReader = sensorTempReader;
             this.physSensorInfo = physSensorInfo;
+            this.weatherForecastService = weatherForecastService;
             this.scopeFactory = scopeFactory;
             telegramBotSettings = options.Value;
             token = telegramBotSettings.TelegramBotAPIKey;
@@ -186,7 +189,7 @@ namespace HomeWeather.Domain.Services.Implementation
         {
             commands.Add(new TempCommand(sensorTempReader));
             commands.Add(new SensorTempCommand(sensorTempReader, physSensorInfo));
-            commands.Add(new ForecastCommand());
+            commands.Add(new ForecastCommand(weatherForecastService));
             commands.Add(new AddUserToTrustedComand(trustedUsers, token.Substring(token.Length - 8)));
             commands.Add(new ApproveTrustedUserCommand(trustedUsers, trustedUsersForApprove));
             commands.Add(new WannaBeTrustedUserCommand(trustedUsersForApprove));
