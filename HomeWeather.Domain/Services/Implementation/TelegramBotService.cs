@@ -190,6 +190,7 @@ namespace HomeWeather.Domain.Services.Implementation
             commands.Add(new TempCommand(sensorTempReader));
             commands.Add(new SensorTempCommand(sensorTempReader, physSensorInfo));
             commands.Add(new ForecastCommand(weatherForecastService));
+            commands.Add(new DailyForecastCommand(weatherForecastService));
             commands.Add(new AddUserToTrustedComand(trustedUsers, token.Substring(token.Length - 8)));
             commands.Add(new ApproveTrustedUserCommand(trustedUsers, trustedUsersForApprove));
             commands.Add(new WannaBeTrustedUserCommand(trustedUsersForApprove));

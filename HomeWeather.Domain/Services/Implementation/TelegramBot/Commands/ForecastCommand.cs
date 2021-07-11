@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HomeWeather.Domain.DTO;
@@ -53,19 +54,23 @@ namespace HomeWeather.Domain.Services.Implementation.TelegramBot.Commands
 
             switch (code)
             {
-                case "01d":
+                case "01d": 
+                case "01n":
                     emoji = clearSky;
                     break;
 
-                case "02d":
+                case "02d": 
+                case "02n":
                     emoji = fewClouds;
                     break;
 
-                case "03d":
+                case "03d": 
+                case "03n":
                     emoji = clouds;
                     break;
 
-                case "04d":
+                case "04d": 
+                case "04n":
                     emoji = brokenClouds;
                     break;
 
@@ -118,6 +123,29 @@ namespace HomeWeather.Domain.Services.Implementation.TelegramBot.Commands
             messageBuilder.AppendLine($"{sunset} <b>Sunset:</b> {forecast.Current.SunsetDate}");
             messageBuilder.AppendLine("");
             messageBuilder.AppendLine($"{spiralCalendar} <b>Forecast date:</b> {forecast.Current.Date}");
+            messageBuilder.AppendLine("");
+            messageBuilder.AppendLine("Short daily forecast");
+
+            int daysInShortForecast = 3;
+            foreach (var dayForecast in forecast.Daily)
+            {
+                if (daysInShortForecast > 0)
+                {
+                    messageBuilder.AppendLine("");
+                    messageBuilder.AppendLine($"{spiralCalendar} {dayForecast.Date.Date.ToString("dd.MM.yyyy")}");
+                    messageBuilder.AppendLine($"{thermometer}{Math.Round(dayForecast.TempMin, 0)}-{Math.Round(dayForecast.TempMax, 0)}\u00B0C {GetEmojiByCode(dayForecast.WeatherCondition.IconName)}");
+                    messageBuilder.AppendLine($"{dashing} {Math.Round(dayForecast.WindSpeed, 0)} m/s");
+                    daysInShortForecast--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            messageBuilder.AppendLine("");
+            messageBuilder.AppendLine("For detailed daily forecast use command /daily_forecast");
+
             await bot.SendTextMessageAsync(chatId, messageBuilder.ToString(), parseMode: ParseMode.Html);
         }
     }
