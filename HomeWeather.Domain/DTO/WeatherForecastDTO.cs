@@ -4,6 +4,8 @@ namespace HomeWeather.Domain.DTO
 {
     public record WeatherForecastDTO 
     {
+        public float Lat { get; set; }
+        public float Lon { get; set; }
         public string Name { get; init; }
         public CurrentWeather Current { get; init; }
         public DailyWeatherForecast[] Daily { get; init; }

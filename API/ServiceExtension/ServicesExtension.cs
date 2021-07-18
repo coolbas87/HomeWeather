@@ -49,6 +49,7 @@ namespace HomeWeather.ServiceExtension
             services.AddScoped<ISensorService, SensorService>();
             services.AddScoped<ITempHistoryService, TempHistoryService>();
             services.AddSingleton<IWeatherForecastService, OpenWeatherForecastService>();
+            services.AddSingleton<ILocationService, LocationService>();
             services.AddSingleton<IBotService, TelegramBotService>();
             services.AddSingleton<IHostedService, TelegramBotService>();
 

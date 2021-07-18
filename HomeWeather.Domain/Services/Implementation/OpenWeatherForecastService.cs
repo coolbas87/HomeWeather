@@ -15,11 +15,14 @@ namespace HomeWeather.Domain.Services.Implementation
 {
     public class OpenWeatherForecastService : IWeatherForecastService
     {
+        private readonly ILocationService locationService;
         private readonly HttpClient client = new HttpClient();
         private readonly ILogger logger;
         private readonly OpenWeatherSettings settings;
         private WeatherForecastDTO LastForecast = null;
+        private WeatherForecastDTO LastLocationForecast = null;
         private DateTime LastDateTimeRequest = DateTime.MinValue;
+        private DateTime LastLocationDateTimeRequest = DateTime.MinValue;
         private CityInfo LastCityInfo = default(CityInfo);
 
         struct CityInfo
@@ -30,11 +33,12 @@ namespace HomeWeather.Domain.Services.Implementation
             public string Name { get; init; }
         }
 
-        public OpenWeatherForecastService(ILogger<OpenWeatherForecastService> logger, IOptions<OpenWeatherSettings> options)
+        public OpenWeatherForecastService(ILogger<OpenWeatherForecastService> logger, IOptions<OpenWeatherSettings> options, ILocationService locationService)
         {
             client.BaseAddress = new Uri("http://api.openweathermap.org/data/2.5/");
             this.logger = logger;
             settings = options.Value;
+            this.locationService = locationService;
         }
 
         private WeatherForecastDTO ConvertToWeatherForecast(OpenWeatherMapForecastDTO openWeatherForecast)
@@ -99,7 +103,8 @@ namespace HomeWeather.Domain.Services.Implementation
                 dailyWeatherForecasts.Add(daily);
             }
 
-            return new WeatherForecastDTO() { Name = LastCityInfo.Name, Current = current, Daily = dailyWeatherForecasts.ToArray() };
+            return new WeatherForecastDTO() { Name = LastCityInfo.Name, Lat = openWeatherForecast.lat, 
+                Lon = openWeatherForecast.lon, Current = current, Daily = dailyWeatherForecasts.ToArray() };
         }
 
         private async Task<T> MakeRequest<T>(string uri)
@@ -142,16 +147,37 @@ namespace HomeWeather.Domain.Services.Implementation
                     LastCityInfo = await GetCityInfo();
                 }
 
-                string uri = $"onecall?lat={LastCityInfo.Lat}&lon={LastCityInfo.Lon}&exclude=minutely,alerts&units=metric&appid={settings.OpenWeatherAPIKey}";
-
-                OpenWeatherMapForecastDTO forecast = await MakeRequest<OpenWeatherMapForecastDTO>(uri);
-
-                LastForecast = ConvertToWeatherForecast(forecast);
-
                 LastDateTimeRequest = DateTime.Now;
+
+                LastForecast = await DoGetForecastByCoords(LastCityInfo.Lat, LastCityInfo.Lon);
             }
 
             return LastForecast;
+        }
+
+        public async Task<WeatherForecastDTO> GetForecastByCoords(float Lat, float Lon)
+        {
+            TimeSpan dateDiff = DateTime.Now - LastLocationDateTimeRequest;
+            if ((dateDiff.TotalHours >= 1) || (Math.Round(LastLocationForecast.Lat, 2) - Math.Round(Lat, 2) > 0.02) ||
+                (Math.Round(LastLocationForecast.Lon, 2) - Math.Round(Lon, 2) > 0.02))
+            {
+                LastCityInfo = new CityInfo() { Lat = Lat, Lon = Lon, Name = await locationService.GetLocationNameByCoords(Lat, Lon) };
+
+                LastLocationDateTimeRequest = DateTime.Now;
+
+                LastLocationForecast = await DoGetForecastByCoords(LastCityInfo.Lat, LastCityInfo.Lon);
+            }
+
+            return LastLocationForecast;
+        }
+
+        private async Task<WeatherForecastDTO> DoGetForecastByCoords(float Lat, float Lon)
+        {
+            string uri = $"onecall?lat={Lat}&lon={Lon}&exclude=minutely,alerts&units=metric&appid={settings.OpenWeatherAPIKey}";
+
+            OpenWeatherMapForecastDTO forecast = await MakeRequest<OpenWeatherMapForecastDTO>(uri);
+
+            return ConvertToWeatherForecast(forecast);
         }
     }
 }

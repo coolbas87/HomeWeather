@@ -190,6 +190,7 @@ namespace HomeWeather.Domain.Services.Implementation
             commands.Add(new TempCommand(sensorTempReader));
             commands.Add(new SensorTempCommand(sensorTempReader, physSensorInfo));
             commands.Add(new ForecastCommand(weatherForecastService));
+            commands.Add(new ForecastByPositionCommand(weatherForecastService));
             commands.Add(new DailyForecastCommand(weatherForecastService));
             commands.Add(new AddUserToTrustedComand(trustedUsers, token.Substring(token.Length - 8)));
             commands.Add(new ApproveTrustedUserCommand(trustedUsers, trustedUsersForApprove));
@@ -228,29 +229,38 @@ namespace HomeWeather.Domain.Services.Implementation
         private async void BotClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs messageEventArgs)
         {
             var message = messageEventArgs.Message;
+            logger.LogDebug($"You received message type: {message.Type}");
 
             if (await IsCanAnswer(message.From, message))
             {
                 await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
                 await Task.Delay(500);
 
-                if (message == null || message.Type != MessageType.Text)
+                if (message != null)
                 {
-                    await botClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-                    return;
-                }
+                    switch (message.Type)
+                    {
+                        case MessageType.Location:
+                            commands.FirstOrDefault(c => c.Name == "/forecast_location")?.Execute(message, botClient);
+                            break;
+                        case MessageType.Text:
+                            logger.LogDebug($"You received message {message.Text}");
+                            Command cmd = commands.FirstOrDefault(c => c.Name == message.Text.Split(' ').First());
 
-                logger.LogDebug($"You received message {message.Text}");
+                            if (cmd == null)
+                            {
+                                await SendCommandsList(message);
+                            }
+                            else
+                            {
+                                await cmd.Execute(message, botClient);
+                            }
 
-                Command cmd = commands.FirstOrDefault(c => c.Name == message.Text.Split(' ').First());
-
-                if (cmd == null)
-                {
-                    await SendCommandsList(message);
-                }
-                else
-                {
-                    await cmd.Execute(message, botClient);
+                            break;
+                        default:
+                            await botClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                            return;
+                    }
                 }
             }
         }
