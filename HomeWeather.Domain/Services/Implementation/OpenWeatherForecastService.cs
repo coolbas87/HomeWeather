@@ -1,5 +1,6 @@
 ﻿using HomeWeather.Domain.Configurations;
 using HomeWeather.Domain.DTO;
+using HomeWeather.Domain.DTO.OpenWeatherMap;
 using HomeWeather.Domain.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -35,13 +36,13 @@ namespace HomeWeather.Domain.Services.Implementation
 
         public OpenWeatherForecastService(ILogger<OpenWeatherForecastService> logger, IOptions<OpenWeatherSettings> options, ILocationService locationService)
         {
-            client.BaseAddress = new Uri("http://api.openweathermap.org/data/2.5/");
+            client.BaseAddress = new Uri("http://api.openweathermap.org/data/");
             this.logger = logger;
             settings = options.Value;
             this.locationService = locationService;
         }
 
-        private WeatherForecastDTO ConvertToWeatherForecast(OpenWeatherMapForecastDTO openWeatherForecast)
+        private WeatherForecastDTO ConvertToWeatherForecast(OneCallForecastDTO openWeatherForecast)
         {
             List<DailyWeatherForecast> dailyWeatherForecasts = new List<DailyWeatherForecast>();
             CurrentWeather current = new CurrentWeather()
@@ -107,6 +108,78 @@ namespace HomeWeather.Domain.Services.Implementation
                 Lon = openWeatherForecast.lon, Current = current, Daily = dailyWeatherForecasts.ToArray() };
         }
 
+        private WeatherForecastDTO ConvertToWeatherForecast(CurrentWeatherDTO currentWeather, FiveDayForecastDTO fiveDayForecast)
+        {
+            List<DailyWeatherForecast> dailyWeatherForecasts = new List<DailyWeatherForecast>();
+            CurrentWeather current = new CurrentWeather()
+            {
+                Date = currentWeather.DataDate,
+                SunriseDate = currentWeather.sys.SunriseDate,
+                SunsetDate = currentWeather.sys.SunsetDate,
+                CloudinessPerc = currentWeather.clouds.all,
+                DewPoint = 0,
+                Humidity = currentWeather.main.humidity,
+                Pressure = currentWeather.main.pressure,
+                Temp = currentWeather.main.temp,
+                TempFeelsLike = currentWeather.main.feels_like,
+                UVI = 0,
+                Visibility = currentWeather.visibility,
+                WindDegrees = currentWeather.wind.deg,
+                WindGust = currentWeather.wind.gust,
+                WindSpeed = currentWeather.wind.speed,
+                RainVolLast1Hour = currentWeather.rain?.volLast1Hour ?? 0,
+                SnowVolLast1Hour = 0,
+                WeatherCondition = currentWeather.weather.Length > 0 ? new WeatherCondition()
+                {
+                    Name = currentWeather.weather[0].main,
+                    Description = currentWeather.weather[0].description,
+                    IconName = currentWeather.weather[0].icon
+                }
+                : default(WeatherCondition)
+            };
+
+            foreach (DayHour dayHour in fiveDayForecast.list.Where(x => x.DataDate.Hour == 0 || x.DataDate.Hour == 6 || x.DataDate.Hour == 12 || x.DataDate.Hour == 21))
+            {
+                DailyWeatherForecast daily = new DailyWeatherForecast()
+                {
+                    Date = dayHour.DataDate,
+                    SunriseDate = fiveDayForecast.city.SunriseDate,
+                    SunsetDate = fiveDayForecast.city.SunsetDate,
+                    CloudinessPerc = dayHour.clouds.all,
+                    DewPoint = 0,
+                    Humidity = dayHour.main.humidity,
+                    Pressure = dayHour.main.pressure,
+                    TempMax = dayHour.main.temp_max,
+                    TempMin = dayHour.main.temp_min,
+                    UVI = 0,
+                    PrecipPercProbability = (int)dayHour.pop * 100,
+                    WindDegrees = dayHour.wind.deg,
+                    WindGust = dayHour.wind.gust,
+                    WindSpeed = dayHour.wind.speed,
+                    RainVol = dayHour.rain?.volLast1Hour ?? 0,
+                    SnowVol = 0,
+                    WeatherCondition = dayHour.weather.Length > 0 ? new WeatherCondition()
+                    {
+                        Name = dayHour.weather[0].main,
+                        Description = dayHour.weather[0].description,
+                        IconName = dayHour.weather[0].icon
+                    }
+                    : default(WeatherCondition)
+                };
+
+                dailyWeatherForecasts.Add(daily);
+            }
+
+            return new WeatherForecastDTO()
+            {
+                Name = LastCityInfo.Name,
+                Lat = currentWeather.coord.lat,
+                Lon = currentWeather.coord.lon,
+                Current = current,
+                Daily = dailyWeatherForecasts.ToArray()
+            };
+        }
+
         private async Task<T> MakeRequest<T>(string uri)
         {
             T reqObject = default(T);
@@ -130,7 +203,7 @@ namespace HomeWeather.Domain.Services.Implementation
 
         private async Task<CityInfo> GetCityInfo()
         {
-            string uri = $"weather?id={settings.ForecastCityID}&units=metric&appid={settings.OpenWeatherAPIKey}";
+            string uri = $"2.5/weather?id={settings.ForecastCityID}&units=metric&appid={settings.OpenWeatherAPIKey}";
 
             CityWeatherDTO cityInfo = await MakeRequest<CityWeatherDTO>(uri);
 
@@ -173,11 +246,19 @@ namespace HomeWeather.Domain.Services.Implementation
 
         private async Task<WeatherForecastDTO> DoGetForecastByCoords(float Lat, float Lon)
         {
-            string uri = $"onecall?lat={Lat}&lon={Lon}&exclude=minutely,alerts&units=metric&appid={settings.OpenWeatherAPIKey}";
+            //string uri = $"3.0/onecall?lat={Lat}&lon={Lon}&exclude=minutely,alerts&units=metric&appid={settings.OpenWeatherAPIKey}";
 
-            OpenWeatherMapForecastDTO forecast = await MakeRequest<OpenWeatherMapForecastDTO>(uri);
+            //OneCallForecastDTO forecast = await MakeRequest<OneCallForecastDTO>(uri);
 
-            return ConvertToWeatherForecast(forecast);
+            //return ConvertToWeatherForecast(forecast);
+
+            string uri = $"2.5/weather?lat={Lat}&lon={Lon}&units=metric&appid={settings.OpenWeatherAPIKey}";
+            CurrentWeatherDTO currentForecast = await MakeRequest<CurrentWeatherDTO>(uri);
+            uri = $"2.5/forecast?lat={Lat}&lon={Lon}&units=metric&appid={settings.OpenWeatherAPIKey}";
+            FiveDayForecastDTO fiveDayForecast = await MakeRequest<FiveDayForecastDTO>(uri);
+            var lst = fiveDayForecast.list.Where(x => x.DataDate.Hour == 0 || x.DataDate.Hour == 6 || x.DataDate.Hour == 12 || x.DataDate.Hour == 21).ToArray();
+
+            return ConvertToWeatherForecast(currentForecast, fiveDayForecast);
         }
     }
 }

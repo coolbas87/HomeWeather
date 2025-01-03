@@ -32,6 +32,7 @@ namespace HomeWeather.Domain.Services.Implementation.TelegramBot.Commands
         protected readonly string sunset = "\U0001F307";
         protected readonly string spiralCalendar = "\U0001F5D3";
         protected readonly string telescope = "\U0001F52D";
+        protected readonly string clockOneThirty = "\U0001F55C";
 
         protected readonly IWeatherForecastService weatherForecastService;
 
@@ -67,14 +68,23 @@ namespace HomeWeather.Domain.Services.Implementation.TelegramBot.Commands
             messageBuilder.AppendLine("");
             messageBuilder.AppendLine("Short daily forecast");
 
-            int daysInShortForecast = 3;
+            int daysInShortForecast = 12;
+            DateTime lastDateTime = DateTime.MinValue;
+            
             foreach (var dayForecast in forecast.Daily)
             {
                 if (daysInShortForecast > 0)
                 {
                     messageBuilder.AppendLine("");
-                    messageBuilder.AppendLine($"{spiralCalendar} {dayForecast.Date.Date.ToString("dd.MM.yyyy")}");
-                    messageBuilder.AppendLine($"{thermometer}{Math.Round(dayForecast.TempMin, 0)}-{Math.Round(dayForecast.TempMax, 0)}\u00B0C {GetEmojiByCode(dayForecast.WeatherCondition.IconName)}");
+                    
+                    if (lastDateTime.Date.Ticks != dayForecast.Date.Date.Ticks)
+                    {
+                        lastDateTime = dayForecast.Date.Date;
+                        messageBuilder.AppendLine($"{spiralCalendar} {dayForecast.Date.ToString("dd.MM.yyyy")}");
+                    }
+                    messageBuilder.AppendLine($"{clockOneThirty} {dayForecast.Date.ToString("HH:mm")}");
+
+                    messageBuilder.AppendLine($"{thermometer} {Math.Round(dayForecast.TempMin, 0)} - {Math.Round(dayForecast.TempMax, 0)}\u00B0C {GetEmojiByCode(dayForecast.WeatherCondition.IconName)}");
                     messageBuilder.AppendLine($"{dashing} {Math.Round(dayForecast.WindSpeed, 0)} m/s");
                     daysInShortForecast--;
                 }

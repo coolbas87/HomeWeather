@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace HomeWeather.Domain.DTO
+namespace HomeWeather.Domain.DTO.OpenWeatherMap
 {
-    public class OpenWeatherMapForecastDTO
+    public class OneCallForecastDTO
     {
         public float lat { get; init; }
         public float lon { get; init; }
@@ -95,25 +95,5 @@ namespace HomeWeather.Domain.DTO
         public float night { get; init; }
         public float eve { get; init; }
         public float morn { get; init; }
-    }
-
-    public class Weather
-    {
-        public int id { get; set; }
-        public string main { get; set; }
-        public string description { get; set; }
-        public string icon { get; set; }
-    }
-
-    public class Rain
-    {
-        [JsonPropertyName("1h")]
-        public float volLast1Hour { get; set; }
-    }
-
-    public class Snow
-    {
-        [JsonPropertyName("1h")]
-        public float volLast1Hour { get; set; }
     }
 }
